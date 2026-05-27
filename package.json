@@ -16,6 +16,7 @@
     "db:studio": "prisma studio",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "verify:release": "bash scripts/verify-release.sh",
     "postinstall": "prisma generate"
   },
   "prisma": {

@@ -12,7 +12,10 @@
 ## Docker 启动（国内 VPS）
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d --build
+# 首次部署需初始化数据库：
+# docker compose -f docker-compose.prod.yml exec app npx prisma migrate deploy
+# docker compose -f docker-compose.prod.yml exec app npx prisma db seed
 ```
 
 见 `docker-compose.prod.yml` 与 `Dockerfile`。

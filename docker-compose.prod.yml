@@ -7,6 +7,14 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/child_ai_tools?schema=public
       AUTH_SECRET: ${AUTH_SECRET}
       AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-小宝打字}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_API_URL: ${LLM_API_URL:-https://open.bigmodel.cn/api/paas/v4/chat/completions}
+      LLM_MODEL: ${LLM_MODEL:-glm-4-flash-250414}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin12345}
     depends_on:
       - postgres
 
