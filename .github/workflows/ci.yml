@@ -43,10 +43,15 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
-  deploy-beta:
+  deploy-vercel:
     name: Deploy to Vercel
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      (vars.DEPLOY_TARGET == 'vercel' ||
+       vars.DEPLOY_TARGET == 'all' ||
+       vars.DEPLOY_TARGET == '')
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -66,15 +71,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate deploy secrets
+      - name: Validate Vercel secrets
         run: |
           missing=0
-          check() {
-            if [[ -z "${!1:-}" ]]; then
-              echo "Missing GitHub secret: $1"
-              missing=1
-            fi
-          }
+          check() { [[ -n "${!1:-}" ]] || { echo "Missing secret: $1"; missing=1; }; }
           check VERCEL_TOKEN
           check VERCEL_ORG_ID
           check VERCEL_PROJECT_ID
@@ -82,16 +82,46 @@ jobs:
           check AUTH_SECRET
           check AUTH_URL
           check LLM_API_KEY
-          if (( missing )); then
-            echo ""
-            echo "Add secrets at:"
-            echo "https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo ""
-            echo "Or run locally after 'gh auth login' and VERCEL_TOKEN in .env:"
-            echo "  npm run deploy:github-secrets"
-            exit 1
-          fi
-      - name: Sync Vercel env from GitHub secrets
+          (( missing )) && exit 1
+      - name: Sync Vercel env
         run: bash scripts/sync-vercel-env-ci.sh
-      - name: Deploy to Vercel
+      - name: Deploy
         run: npx vercel@latest deploy --prod --token="$VERCEL_TOKEN"
+
+  deploy-aliyun:
+    name: Deploy to Aliyun ECS
+    needs: test
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      (vars.DEPLOY_TARGET == 'aliyun' || vars.DEPLOY_TARGET == 'all')
+    runs-on: ubuntu-latest
+    env:
+      ALIYUN_SSH_HOST: ${{ secrets.ALIYUN_SSH_HOST }}
+      ALIYUN_SSH_USER: ${{ secrets.ALIYUN_SSH_USER }}
+      ALIYUN_SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SSH_PRIVATE_KEY }}
+      ALIYUN_AUTH_URL: ${{ secrets.ALIYUN_AUTH_URL }}
+      AUTH_URL: ${{ secrets.ALIYUN_AUTH_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_API_URL: https://open.bigmodel.cn/api/paas/v4/chat/completions
+      LLM_MODEL: glm-4-flash-250414
+      NEXT_PUBLIC_APP_NAME: 小宝打字
+      DATABASE_POOL_MAX: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Aliyun secrets
+        run: |
+          missing=0
+          check() { [[ -n "${!1:-}" ]] || { echo "Missing secret: $1"; missing=1; }; }
+          check ALIYUN_SSH_HOST
+          check ALIYUN_SSH_USER
+          check ALIYUN_SSH_PRIVATE_KEY
+          check DATABASE_URL
+          check AUTH_SECRET
+          check LLM_API_KEY
+          check ALIYUN_AUTH_URL
+          (( missing )) && exit 1
+      - name: Deploy to ECS
+        run: bash scripts/deploy-aliyun-ci.sh

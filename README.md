@@ -50,19 +50,24 @@ npm run lint
 npm run build
 ```
 
-## 内测上线（Vercel + Neon，推荐）
+## 内测上线
 
-**逐步指南：** [docs/beta-neon-vercel.md](docs/beta-neon-vercel.md)
+| 目标 | `DEPLOY_TARGET` | 文档 |
+|------|-----------------|------|
+| **Vercel**（默认，海外） | `vercel` | [beta-neon-vercel.md](docs/beta-neon-vercel.md) |
+| **阿里云香港**（免备案） | `aliyun` | [beta-aliyun-hk.md](docs/beta-aliyun-hk.md) |
+| **两者并存** | `all` | 同上 |
 
 ```bash
-npx vercel login
-export DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require"
-npm run db:bootstrap          # 首次：迁移 + seed
-FIRST_DEPLOY=1 npm run deploy:beta
-# 拿到 URL 后设置 AUTH_URL，再运行 npm run deploy:beta
-```
+# 默认 Vercel
+npm run deploy:beta
 
-总览：[docs/launch-runbook.md](docs/launch-runbook.md)
+# 阿里云香港 ECS
+DEPLOY_TARGET=aliyun npm run deploy:beta
+
+# GitHub CI：仓库 Variable DEPLOY_TARGET=vercel|aliyun|all
+npm run deploy:github-secrets
+```
 
 ## Cloudflare Workers（可选）
 

@@ -1,29 +1,33 @@
 import type { NextConfig } from "next";
 
 const deployTarget = process.env.DEPLOY_TARGET ?? "vercel";
+const dockerTargets = new Set(["cloudflare", "aliyun", "docker"]);
 
-const cloudflareConfig: NextConfig =
-  deployTarget === "cloudflare"
-    ? {
-        output: "standalone",
-        serverExternalPackages: [
-          "pg",
-          "pg-cloudflare",
-          "@prisma/client",
-          "@prisma/adapter-pg",
-        ],
-        outputFileTracingIncludes: {
-          "**/*": [
-            "./node_modules/pg-cloudflare/dist/**",
-            "./node_modules/pg-cloudflare/esm/**",
-          ],
-        },
-      }
-    : {};
+const dockerConfig: NextConfig = dockerTargets.has(deployTarget)
+  ? {
+      output: "standalone",
+      serverExternalPackages: [
+        "pg",
+        "@prisma/client",
+        "@prisma/adapter-pg",
+        ...(deployTarget === "cloudflare" ? (["pg-cloudflare"] as const) : []),
+      ],
+      ...(deployTarget === "cloudflare"
+        ? {
+            outputFileTracingIncludes: {
+              "**/*": [
+                "./node_modules/pg-cloudflare/dist/**",
+                "./node_modules/pg-cloudflare/esm/**",
+              ],
+            },
+          }
+        : {}),
+    }
+  : {};
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  ...cloudflareConfig,
+  ...dockerConfig,
 };
 
 export default nextConfig;
