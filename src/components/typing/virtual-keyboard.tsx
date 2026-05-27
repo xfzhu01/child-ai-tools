@@ -2,7 +2,10 @@
 
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { normalizeKey } from "@/lib/typing-engine/analyzer";
+import { normalizeTypingChar } from "@/lib/typing-engine/typing-chars";
 import { cn } from "@/lib/utils";
+
+export { normalizeTypingChar, normalizeTypingText } from "@/lib/typing-engine/typing-chars";
 
 const NUMBER_ROW = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"] as const;
 
@@ -58,12 +61,15 @@ export function keyboardKeyToChar(keyId: KeyboardKey): string {
 
 export function charToKeyId(char: string | undefined): KeyboardKey | undefined {
   if (!char) return undefined;
-  if (char === " ") return "space";
-  if (char === "\t") return "tab";
-  if (char === "\n") return "enter";
-  if ((NUMBER_ROW as readonly string[]).includes(char)) return char as NumberKey;
-  if ((PUNCTUATION_ROW as readonly string[]).includes(char)) return char as PunctuationKey;
-  const lower = char.toLowerCase();
+  const normalized = normalizeTypingChar(char);
+  if (normalized === " ") return "space";
+  if (normalized === "\t") return "tab";
+  if (normalized === "\n") return "enter";
+  if ((NUMBER_ROW as readonly string[]).includes(normalized)) return normalized as NumberKey;
+  if ((PUNCTUATION_ROW as readonly string[]).includes(normalized)) {
+    return normalized as PunctuationKey;
+  }
+  const lower = normalized.toLowerCase();
   for (const row of ROWS) {
     if ((row as readonly string[]).includes(lower)) {
       return lower as LetterKey;
@@ -82,6 +88,7 @@ export function inputToKeyId(input: string): KeyboardKey | undefined {
 }
 
 export function toKeyboardKey(key: string): KeyboardKey | undefined {
+  const normalized = key.length === 1 ? normalizeTypingChar(key) : key;
   const aliases: Record<string, KeyboardKey> = {
     " ": "space",
     space: "space",
@@ -96,26 +103,30 @@ export function toKeyboardKey(key: string): KeyboardKey | undefined {
     Shift: "shift",
     shift: "shift",
   };
-  if (aliases[key]) return aliases[key];
-  if ((NUMBER_ROW as readonly string[]).includes(key)) return key as NumberKey;
-  if ((PUNCTUATION_ROW as readonly string[]).includes(key)) return key as PunctuationKey;
-  const normalized = key.length === 1 ? key.toLowerCase() : key;
+  if (aliases[normalized]) return aliases[normalized];
+  if ((NUMBER_ROW as readonly string[]).includes(normalized)) return normalized as NumberKey;
+  if ((PUNCTUATION_ROW as readonly string[]).includes(normalized)) {
+    return normalized as PunctuationKey;
+  }
+  const lower = normalized.length === 1 ? normalized.toLowerCase() : normalized;
   for (const row of ROWS) {
-    if ((row as readonly string[]).includes(normalized)) {
-      return normalized as LetterKey;
+    if ((row as readonly string[]).includes(lower)) {
+      return lower as LetterKey;
     }
   }
   return undefined;
 }
 
 export function matchKeystroke(input: string, expectedChar: string): boolean {
-  if (expectedChar === "\n") return input === "\n";
-  if (expectedChar === "\t") return input === "\t";
-  if (expectedChar === " ") return input === " ";
-  if (/[a-zA-Z]/.test(expectedChar)) {
-    return normalizeKey(input) === expectedChar.toLowerCase();
+  const normalizedInput = normalizeTypingChar(input);
+  const normalizedExpected = normalizeTypingChar(expectedChar);
+  if (normalizedExpected === "\n") return normalizedInput === "\n";
+  if (normalizedExpected === "\t") return normalizedInput === "\t";
+  if (normalizedExpected === " ") return normalizedInput === " ";
+  if (/[a-zA-Z]/.test(normalizedExpected)) {
+    return normalizeKey(normalizedInput) === normalizedExpected.toLowerCase();
   }
-  return input === expectedChar;
+  return normalizedInput === normalizedExpected;
 }
 
 export function formatKeyLabel(keyId: KeyboardKey): string {
@@ -140,9 +151,10 @@ export function formatKeyLabel(keyId: KeyboardKey): string {
 }
 
 export function displayTargetChar(char: string): string {
-  if (char === "\n") return "↵";
-  if (char === "\t") return "⇥";
-  return char;
+  const normalized = normalizeTypingChar(char);
+  if (normalized === "\n") return "↵";
+  if (normalized === "\t") return "⇥";
+  return normalized;
 }
 
 export type PromptCharState = "typed" | "active" | "pending";

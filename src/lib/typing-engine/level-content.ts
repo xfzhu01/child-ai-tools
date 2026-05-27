@@ -16,6 +16,7 @@ import {
   getFoundationItemsPerLevel,
   getFoundationLevelTitle,
 } from "./foundation-levels";
+import { AI_CUSTOM_LEVEL_COUNT } from "@/lib/ai/mini-games";
 
 export type GameMode =
   | "ASSESSMENT"
@@ -34,6 +35,8 @@ export function getLevelCount(mode: GameMode): number {
       return CHAIN_LEVEL_COUNT;
     case "FOUNDATION":
       return FOUNDATION_LEVEL_COUNT;
+    case "AI_CUSTOM":
+      return AI_CUSTOM_LEVEL_COUNT;
     default:
       return 1;
   }
@@ -47,6 +50,8 @@ export function getItemsPerLevel(mode: GameMode, level = 1): number {
       return CHAIN_IDIOMS_PER_LEVEL;
     case "FOUNDATION":
       return getFoundationItemsPerLevel(level);
+    case "AI_CUSTOM":
+      return 1;
     default:
       return 1;
   }
@@ -143,6 +148,9 @@ export function getLevelTitle(mode: GameMode, level: number): string {
   if (mode === "FOUNDATION") {
     const title = getFoundationLevelTitle(level);
     return diff ? `${title} · ${diff}` : title;
+  }
+  if (mode === "AI_CUSTOM") {
+    return `AI 定制 · 第 ${level}/${AI_CUSTOM_LEVEL_COUNT} 关`;
   }
   return `第 ${level} 关`;
 }

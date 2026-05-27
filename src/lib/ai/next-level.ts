@@ -1,6 +1,15 @@
 import prisma from "@/lib/db";
 import { chatCompletionJson, isLLMConfigured } from "@/lib/ai/llm";
 import {
+  buildMiniGameSystemPrompt,
+  buildMiniGameUserPrompt,
+  buildRuleMiniGameItems,
+  getMiniGameMeta,
+  normalizeMiniGameItems,
+  pickMiniGameTypeForLevel,
+  type AiMiniGameType,
+} from "@/lib/ai/mini-games";
+import {
   adjustDifficulty,
   buildRuleExercises,
   detectAdjacentErrors,
@@ -14,6 +23,7 @@ import {
   getLevelTitle,
   type GameMode,
 } from "@/lib/typing-engine/level-content";
+import { normalizeTypingText } from "@/lib/typing-engine/typing-chars";
 
 export type AiLevelItem = {
   text: string;
@@ -21,6 +31,8 @@ export type AiLevelItem = {
   title?: string;
   hanzi?: string;
   chainHint?: string;
+  prompt?: string;
+  hint?: string;
 };
 
 export type NextLevelResult = {
@@ -29,6 +41,9 @@ export type NextLevelResult = {
   difficulty: number;
   parentSummary: string;
   source: "ai" | "rule";
+  gameType?: AiMiniGameType;
+  gameTitle?: string;
+  gameEmoji?: string;
 };
 
 type ChildContext = {
@@ -122,7 +137,7 @@ function staticFallbackItems(mode: GameMode, level: number, count: number): AiLe
 }
 
 function ruleGeneratedItems(ctx: ChildContext, mode: GameMode, level: number, count: number): AiLevelItem[] {
-  if (mode === "AI_CUSTOM" || mode === "ADVENTURE") {
+  if (mode === "ADVENTURE") {
     return buildRuleExercises(ctx.focusKeys, ctx.difficulty, ctx.age)
       .slice(0, count)
       .map((item) => ({ text: item.text, focusKey: item.focusKey }));
@@ -141,7 +156,6 @@ function ruleGeneratedItems(ctx: ChildContext, mode: GameMode, level: number, co
 }
 
 function modeItemCount(mode: GameMode) {
-  if (mode === "AI_CUSTOM") return 5;
   return getItemsPerLevel(mode);
 }
 
@@ -154,9 +168,6 @@ function buildSystemPrompt(mode: GameMode) {
   }
   if (mode === "ASSESSMENT") {
     return `${base} 输出格式：{"items":[{"text":"一段覆盖弱项键位的英文练习句","title":"关卡标题"}],"summary":"给家长的中文摘要"}`;
-  }
-  if (mode === "AI_CUSTOM") {
-    return `${base} 输出格式：{"items":[{"text":"英文短句或单词","focusKey":"重点键位"}...],"summary":"给家长的中文摘要"}`;
   }
   return `${base} 输出格式：{"items":[{"text":"英文单词"}...],"summary":"给家长的中文摘要"}`;
 }
@@ -181,7 +192,7 @@ function normalizeLLMItems(
   return raw
     .filter((item) => isChildSafe(item.text))
     .map((item) => ({
-      text: item.text.trim(),
+      text: normalizeTypingText(item.text.trim()),
       focusKey: item.focusKey,
       title: item.title ?? (mode === "ASSESSMENT" ? getLevelTitle(mode, level) : undefined),
       hanzi: item.hanzi,
@@ -211,6 +222,87 @@ async function generateWithLLM(
   return { items, summary: parsed.summary };
 }
 
+async function generateMiniGameWithLLM(
+  ctx: ChildContext,
+  gameType: AiMiniGameType,
+  level: number,
+): Promise<{ items: AiLevelItem[]; summary: string } | null> {
+  const parsed = await chatCompletionJson<{
+    items?: AiLevelItem[];
+    summary?: string;
+  }>([
+    { role: "system", content: buildMiniGameSystemPrompt(gameType) },
+    {
+      role: "user",
+      content: buildMiniGameUserPrompt(gameType, {
+        name: ctx.name,
+        age: ctx.age,
+        focusKeys: ctx.focusKeys,
+        adjacent: ctx.adjacent,
+        difficulty: ctx.difficulty,
+        avgAccuracy: ctx.avgAccuracy,
+        avgWpm: ctx.avgWpm,
+        sessionsCount: ctx.sessionsCount,
+        level,
+      }),
+    },
+  ]);
+
+  if (!parsed?.items?.length || !parsed.summary) return null;
+
+  const items = normalizeMiniGameItems(parsed.items, gameType);
+  if (items.length === 0) return null;
+
+  return { items, summary: parsed.summary };
+}
+
+async function buildAiCustomLevel(ctx: ChildContext, level: number): Promise<NextLevelResult> {
+  const gameType = pickMiniGameTypeForLevel(ctx.id, level);
+  const meta = getMiniGameMeta(gameType);
+  let items: AiLevelItem[] = [];
+  let parentSummary = `${ctx.name} 的第 ${level} 关：${meta.title}，重点练习 ${ctx.focusKeys.join("、") || "基础键位"}`;
+  let source: "ai" | "rule" = "rule";
+
+  if (isLLMConfigured()) {
+    try {
+      const aiResult = await generateMiniGameWithLLM(ctx, gameType, level);
+      if (aiResult) {
+        items = aiResult.items;
+        parentSummary = aiResult.summary;
+        source = "ai";
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  if (items.length === 0) {
+    items = buildRuleMiniGameItems(gameType, {
+      focusKeys: ctx.focusKeys,
+      age: ctx.age,
+      difficulty: ctx.difficulty,
+    });
+  } else if (items.length < meta.targetCount) {
+    const ruleItems = buildRuleMiniGameItems(gameType, {
+      focusKeys: ctx.focusKeys,
+      age: ctx.age,
+      difficulty: ctx.difficulty,
+    });
+    items = [...items, ...ruleItems].slice(0, meta.targetCount);
+  }
+
+  return {
+    focusKeys: ctx.focusKeys,
+    items,
+    difficulty: ctx.difficulty,
+    parentSummary,
+    source,
+    gameType,
+    gameTitle: meta.title,
+    gameEmoji: meta.emoji,
+  };
+}
+
 export async function buildNextLevel(input: {
   childId: string;
   mode: GameMode;
@@ -222,6 +314,11 @@ export async function buildNextLevel(input: {
 
   const mode = input.mode;
   const level = input.level ?? 1;
+
+  if (mode === "AI_CUSTOM") {
+    return buildAiCustomLevel(ctx, level);
+  }
+
   const count = modeItemCount(mode);
 
   let items: AiLevelItem[] = [];

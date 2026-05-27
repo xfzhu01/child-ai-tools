@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AdventureStage } from "@/components/typing/adventure-stage";
+import { AiCustomStage } from "@/components/typing/ai-custom-stage";
+import { KeyRainStage } from "@/components/typing/key-rain-stage";
 import { ChainStage } from "@/components/typing/chain-stage";
 import { FoundationStage } from "@/components/typing/foundation-stage";
 import {
   VirtualKeyboard,
   TargetPromptChar,
   matchKeystroke,
+  normalizeTypingChar,
+  normalizeTypingText,
   toKeyboardKey,
 } from "@/components/typing/virtual-keyboard";
 import { Button } from "@/components/ui/button";
@@ -26,9 +30,37 @@ import {
 import { getFoundationPassAccuracy } from "@/lib/typing-engine/foundation-levels";
 import { matchPinyinKeystroke } from "@/lib/typing-engine/pinyin";
 import type { AiLevelItem } from "@/lib/ai/next-level";
+import type { AiMiniGameType } from "@/lib/ai/mini-games";
 import { t } from "@/lib/i18n";
 
 const SHATTER_MS = 500;
+
+type BurstTiming = {
+  shatterMs: number;
+  celebrateMs: number;
+  flashCorrectMs: number;
+  flashErrorMs: number;
+  errorShakeMs: number;
+};
+
+function getBurstTiming(mode: GameMode): BurstTiming {
+  if (mode === "AI_CUSTOM") {
+    return {
+      shatterMs: 260,
+      celebrateMs: 360,
+      flashCorrectMs: 140,
+      flashErrorMs: 320,
+      errorShakeMs: 260,
+    };
+  }
+  return {
+    shatterMs: SHATTER_MS,
+    celebrateMs: 750,
+    flashCorrectMs: 350,
+    flashErrorMs: 600,
+    errorShakeMs: 350,
+  };
+}
 
 type LevelMeta = {
   hanzi?: string;
@@ -36,6 +68,8 @@ type LevelMeta = {
   levelTitle?: string;
   foundationLetter?: string;
   foundationKind?: "letter" | "exam";
+  aiPrompt?: string;
+  aiHint?: string;
 };
 
 type SaveProgressPayload = {
@@ -56,6 +90,9 @@ type Props = {
   level: number;
   startItemIndex: number;
   aiLevelItems?: AiLevelItem[];
+  aiGameType?: AiMiniGameType;
+  aiGameTitle?: string;
+  aiGameEmoji?: string;
   onSaveProgress: (payload: SaveProgressPayload, options?: SaveProgressOptions) => Promise<boolean>;
   onSaveCheckpoint?: (payload: SaveProgressPayload) => Promise<void>;
   onComplete: (payload: {
@@ -77,6 +114,16 @@ function loadItem(
 ): { text: string; meta: LevelMeta } | null {
   const aiItem = aiLevelItems?.[itemIndex];
   if (aiItem) {
+    if (mode === "AI_CUSTOM") {
+      return {
+        text: normalizeTypingText(aiItem.text),
+        meta: {
+          levelTitle: getLevelTitle(mode, level),
+          aiPrompt: aiItem.prompt ? normalizeTypingText(aiItem.prompt) : undefined,
+          aiHint: aiItem.hint,
+        },
+      };
+    }
     if (mode === "CHAIN" && aiItem.hanzi) {
       return {
         text: aiItem.text,
@@ -88,7 +135,7 @@ function loadItem(
       };
     }
     return {
-      text: aiItem.text,
+      text: normalizeTypingText(aiItem.text),
       meta: { levelTitle: aiItem.title ?? getLevelTitle(mode, level) },
     };
   }
@@ -109,7 +156,7 @@ function loadItem(
 
   if (content.kind === "text") {
     return {
-      text: content.text,
+      text: normalizeTypingText(content.text),
       meta: { levelTitle: content.title ?? getLevelTitle(mode, level) },
     };
   }
@@ -144,6 +191,10 @@ function matchForMode(mode: GameMode, input: string, expected: string) {
   return matchKeystroke(input, expected);
 }
 
+function usesBurstTyping(mode: GameMode) {
+  return mode === "ADVENTURE" || mode === "FOUNDATION" || mode === "AI_CUSTOM";
+}
+
 export function TypingGame({
   childId,
   mode,
@@ -151,6 +202,9 @@ export function TypingGame({
   level,
   startItemIndex,
   aiLevelItems,
+  aiGameType,
+  aiGameTitle,
+  aiGameEmoji,
   onSaveProgress,
   onSaveCheckpoint,
   onComplete,
@@ -160,9 +214,7 @@ export function TypingGame({
     [mode, level, startItemIndex, aiLevelItems],
   );
 
-  const itemsPerLevel =
-    aiLevelItems?.length ??
-    (mode === "AI_CUSTOM" ? 5 : getItemsPerLevel(mode, level));
+  const itemsPerLevel = aiLevelItems?.length ?? getItemsPerLevel(mode, level);
   const totalItems = itemsPerLevel;
 
   const [itemIndex, setItemIndex] = useState(startItemIndex);
@@ -235,15 +287,19 @@ export function TypingGame({
     lastTimestamp.current = Date.now();
   }, []);
 
-  const flashKey = useCallback((rawInput: string, result: "correct" | "error") => {
-    if (flashTimer.current) clearTimeout(flashTimer.current);
-    setPressedKey(rawInput);
-    setPressResult(result);
-    flashTimer.current = setTimeout(() => {
-      setPressedKey(undefined);
-      setPressResult(null);
-    }, result === "error" ? 600 : 350);
-  }, []);
+  const flashKey = useCallback(
+    (rawInput: string, result: "correct" | "error") => {
+      const timing = getBurstTiming(mode);
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+      setPressedKey(rawInput);
+      setPressResult(result);
+      flashTimer.current = setTimeout(() => {
+        setPressedKey(undefined);
+        setPressResult(null);
+      }, result === "error" ? timing.flashErrorMs : timing.flashCorrectMs);
+    },
+    [mode],
+  );
 
   const syncTargetKey = useCallback((text: string, index: number) => {
     setTargetKey(text[index]);
@@ -257,19 +313,22 @@ export function TypingGame({
     setShatteringIndices([]);
   }, []);
 
-  const triggerShatter = useCallback((index: number) => {
-    setShatteringIndices((prev) => (prev.includes(index) ? prev : [...prev, index]));
+  const triggerShatter = useCallback(
+    (index: number) => {
+      setShatteringIndices((prev) => (prev.includes(index) ? prev : [...prev, index]));
 
-    const existing = shatterTimers.current.get(index);
-    if (existing) clearTimeout(existing);
+      const existing = shatterTimers.current.get(index);
+      if (existing) clearTimeout(existing);
 
-    const timer = setTimeout(() => {
-      setShatteringIndices((prev) => prev.filter((i) => i !== index));
-      shatterTimers.current.delete(index);
-    }, SHATTER_MS);
+      const timer = setTimeout(() => {
+        setShatteringIndices((prev) => prev.filter((i) => i !== index));
+        shatterTimers.current.delete(index);
+      }, getBurstTiming(mode).shatterMs);
 
-    shatterTimers.current.set(index, timer);
-  }, []);
+      shatterTimers.current.set(index, timer);
+    },
+    [mode],
+  );
 
   const goToNextItem = useCallback(
     async (nextItemIndex: number) => {
@@ -301,13 +360,13 @@ export function TypingGame({
 
   const advanceAfterItem = useCallback(
     (nextItemIndex: number) => {
-      if (mode === "ADVENTURE" || mode === "FOUNDATION") {
+      if (usesBurstTyping(mode)) {
         setCelebrating(true);
         celebrateTimer.current = setTimeout(() => {
           clearShatterTimers();
           setCelebrating(false);
           void goToNextItem(nextItemIndex);
-        }, 750);
+        }, getBurstTiming(mode).celebrateMs);
         return;
       }
 
@@ -364,17 +423,20 @@ export function TypingGame({
 
       if (!correct) {
         setCombo(0);
-        if (mode === "ADVENTURE" || mode === "FOUNDATION") {
+        if (usesBurstTyping(mode)) {
           setErrorShake(true);
           if (errorShakeTimer.current) clearTimeout(errorShakeTimer.current);
-          errorShakeTimer.current = setTimeout(() => setErrorShake(false), 350);
+          errorShakeTimer.current = setTimeout(
+            () => setErrorShake(false),
+            getBurstTiming(mode).errorShakeMs,
+          );
         }
         return;
       }
 
       setCombo((c) => c + 1);
 
-      if (mode === "ADVENTURE" || mode === "FOUNDATION") {
+      if (usesBurstTyping(mode)) {
         const shatterAt = typed.length;
         const nextTyped = typed + expectedChar;
         setTyped(nextTyped);
@@ -410,7 +472,7 @@ export function TypingGame({
   );
 
   const stats = analyzeSession(events);
-  const stars = calculateStars({ ...stats, comboMax: combo }, age);
+  const stars = calculateStars(stats, age);
   const passAccuracy = mode === "FOUNDATION" ? getFoundationPassAccuracy(level) : undefined;
   const examPassed = passAccuracy === undefined || stats.accuracy >= passAccuracy;
   const levelPassed = levelComplete && examPassed;
@@ -451,7 +513,7 @@ export function TypingGame({
       return;
     }
     await onComplete({
-      stats: { ...stats, comboMax: combo },
+      stats,
       stars,
       events,
       level,
@@ -500,6 +562,7 @@ export function TypingGame({
         return;
       }
       if (celebrating) return;
+      if (e.isComposing) return;
 
       if (e.key === "Backspace") {
         e.preventDefault();
@@ -524,14 +587,16 @@ export function TypingGame({
       if (e.key === "Shift") return;
 
       if (e.key.length !== 1) return;
+
+      const keyChar = normalizeTypingChar(e.key);
       if (mode === "CHAIN") {
-        if (!/[a-zA-Z ]/.test(e.key)) return;
-      } else if (!toKeyboardKey(e.key) && !/[0-9]/.test(e.key)) {
+        if (!/[a-zA-Z ]/.test(keyChar)) return;
+      } else if (!toKeyboardKey(keyChar) && !/[0-9]/.test(keyChar)) {
         return;
       }
 
       e.preventDefault();
-      handleKey(e.key);
+      handleKey(keyChar);
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -557,7 +622,40 @@ export function TypingGame({
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col" data-child-id={childId}>
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 py-8">
-        {mode === "ADVENTURE" || mode === "AI_CUSTOM" ? (
+        {mode === "AI_CUSTOM" && aiGameType ? (
+          aiGameType === "key_rain" ? (
+            <KeyRainStage
+              gameTitle={aiGameTitle}
+              gameEmoji={aiGameEmoji}
+              levelTitle={promptTitle}
+              targetText={targetText}
+              hint={levelMeta.aiHint}
+              typedLength={typed.length}
+              itemRound={itemIndex + 1}
+              totalRounds={totalItems}
+              combo={combo}
+              celebrating={celebrating}
+              errorShake={errorShake}
+            />
+          ) : (
+            <AiCustomStage
+              gameType={aiGameType}
+              gameTitle={aiGameTitle}
+              gameEmoji={aiGameEmoji}
+              levelTitle={promptTitle}
+              targetText={targetText}
+              displayPrompt={levelMeta.aiPrompt}
+              hint={levelMeta.aiHint}
+              typedLength={typed.length}
+              itemRound={itemIndex + 1}
+              totalRounds={totalItems}
+              combo={combo}
+              celebrating={celebrating}
+              shatteringIndices={shatteringIndices}
+              errorShake={errorShake}
+            />
+          )
+        ) : mode === "ADVENTURE" ? (
           <AdventureStage
             word={targetText}
             typedLength={typed.length}

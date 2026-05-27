@@ -43,7 +43,7 @@ export async function getModeProgress(childId: string, mode: ContentMode) {
 
 export async function getAllModeProgress(childId: string) {
   const rows = await prisma.modeProgress.findMany({ where: { childId } });
-  const modes: ContentMode[] = ["ASSESSMENT", "ADVENTURE", "CHAIN", "FOUNDATION"];
+  const modes: ContentMode[] = ["ASSESSMENT", "ADVENTURE", "CHAIN", "FOUNDATION", "AI_CUSTOM"];
   const map: Partial<Record<ContentMode, ModeProgressSnapshot>> = {};
   for (const mode of modes) {
     const row = rows.find((r) => r.mode === mode);

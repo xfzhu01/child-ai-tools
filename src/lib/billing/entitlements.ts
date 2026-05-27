@@ -35,7 +35,16 @@ async function getActiveEntitlements(userId: string) {
   });
 }
 
+async function isAdminUser(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { isAdmin: true },
+  });
+  return Boolean(user?.isAdmin);
+}
+
 export async function getSubscriptionTier(userId: string): Promise<SubscriptionTier> {
+  if (await isAdminUser(userId)) return TIER_AI;
   const rows = await getActiveEntitlements(userId);
   if (rows.some((r) => tierGrantsAi(r.tier))) return TIER_AI;
   if (rows.some((r) => tierGrantsBasic(r.tier))) return TIER_BASIC;
@@ -43,10 +52,11 @@ export async function getSubscriptionTier(userId: string): Promise<SubscriptionT
 }
 
 export async function getSubscriptionStatus(userId: string) {
-  const tier = await getSubscriptionTier(userId);
+  const isAdmin = await isAdminUser(userId);
+  const tier = isAdmin ? TIER_AI : await getSubscriptionTier(userId);
   return {
     tier,
-    label: subscriptionLabel(tier),
+    label: isAdmin ? "管理员 · AI 智能版" : subscriptionLabel(tier),
     hasBasic: tier !== "free",
     hasAi: tier === TIER_AI,
   };

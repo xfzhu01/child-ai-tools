@@ -19,7 +19,7 @@
 ```bash
 cp .env.example .env
 # 编辑 DATABASE_URL、AUTH_SECRET
-# AI 关卡生成（OpenAI 兼容接口，默认 DeepSeek）：LLM_API_KEY 或 DEEPSEEK_API_KEY
+# AI 关卡生成（OpenAI 兼容接口，默认智谱 GLM-4.7）：LLM_API_KEY 或 ZHIPU_API_KEY
 openssl rand -base64 32  # 生成 AUTH_SECRET
 ```
 

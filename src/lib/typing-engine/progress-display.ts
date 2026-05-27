@@ -2,12 +2,13 @@ import { getItemsPerLevel, getLevelCount, type GameMode } from "@/lib/typing-eng
 import type { ModeProgressSnapshot } from "@/lib/typing-engine/mode-progress";
 import { t } from "@/lib/i18n";
 
-const OFFICIAL_MODES: GameMode[] = ["FOUNDATION", "ASSESSMENT", "ADVENTURE", "CHAIN"];
+const OFFICIAL_MODES: GameMode[] = ["FOUNDATION", "ASSESSMENT", "ADVENTURE", "CHAIN", "AI_CUSTOM"];
 
 export function modeTitle(mode: GameMode): string {
   if (mode === "FOUNDATION") return t("learn.foundation");
   if (mode === "ASSESSMENT") return t("learn.assessment");
   if (mode === "ADVENTURE") return t("learn.adventure");
+  if (mode === "AI_CUSTOM") return t("learn.aiCustom");
   return t("learn.chain");
 }
 
@@ -32,6 +33,9 @@ export function formatModeProgress(mode: GameMode, progress: ModeProgressSnapsho
 
   const starsCount = Object.keys(progress.levelStars).length;
   if (progress.itemIndex > 0) {
+    if (mode === "AI_CUSTOM") {
+      return `第 ${progress.currentLevel}/${total} 关 · 小游戏进行中`;
+    }
     const items = getItemsPerLevel(mode, progress.currentLevel);
     return `第 ${progress.currentLevel}/${total} 关 · 进行中（${progress.itemIndex + 1}/${items} 项）`;
   }

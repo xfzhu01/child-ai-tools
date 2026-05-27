@@ -9,13 +9,20 @@ export type LLMConfig = {
   model: string;
 };
 
-/** OpenAI-compatible chat completions (DeepSeek default). */
+/** OpenAI-compatible chat completions (Zhipu GLM / DeepSeek). */
 export function getLLMConfig(): LLMConfig {
-  return {
-    apiUrl: process.env.LLM_API_URL ?? "https://api.deepseek.com/v1/chat/completions",
-    apiKey: process.env.LLM_API_KEY ?? process.env.DEEPSEEK_API_KEY ?? "",
-    model: process.env.LLM_MODEL ?? "deepseek-chat",
-  };
+  const apiKey =
+    process.env.LLM_API_KEY ??
+    process.env.ZHIPU_API_KEY ??
+    process.env.DEEPSEEK_API_KEY ??
+    "";
+  const apiUrl =
+    process.env.LLM_API_URL ?? "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+  const model =
+    process.env.LLM_MODEL ??
+    (apiUrl.includes("bigmodel.cn") ? "glm-4-flash-250414" : "deepseek-chat");
+
+  return { apiUrl, apiKey, model };
 }
 
 export function isLLMConfigured() {
@@ -43,7 +50,13 @@ export async function chatCompletionJson<T>(
     }),
   });
 
-  if (!response.ok) return null;
+  if (!response.ok) {
+    if (process.env.NODE_ENV !== "production") {
+      const body = await response.text();
+      console.error("[LLM]", response.status, body);
+    }
+    return null;
+  }
 
   const data = (await response.json()) as {
     choices?: { message?: { content?: string } }[];

@@ -48,8 +48,8 @@ const modes = [
   {
     id: "AI_CUSTOM" as const,
     title: t("learn.aiCustom"),
-    desc: "AI 根据练习数据智能生成下一关内容",
-    href: (id: string) => `/learn/${id}/play?mode=AI_CUSTOM`,
+    desc: "100 关随机小游戏，AI 分析弱项后填充练习内容，完成一关自动进入下一关",
+    href: (id: string) => `/learn/${id}/play?mode=AI_CUSTOM&resume=1`,
     always: false,
   },
 ];
@@ -107,8 +107,7 @@ export default async function LearnPage({ params }: { params: Promise<{ childId:
           const locked = mode.id === "AI_CUSTOM" && !aiUnlocked;
           const recommendedFoundation = mode.id === "FOUNDATION";
           const recommended = !child.assessmentDone && mode.id === "ASSESSMENT";
-          const modeProgress =
-            mode.id !== "AI_CUSTOM" ? progressMap[mode.id as GameMode] : undefined;
+          const modeProgress = progressMap[mode.id as GameMode];
           const progressLabel =
             modeProgress && hasModeProgress(modeProgress)
               ? formatModeProgress(mode.id as GameMode, modeProgress)
@@ -129,9 +128,9 @@ export default async function LearnPage({ params }: { params: Promise<{ childId:
               <p className="mt-2 text-sm text-slate-600">{mode.desc}</p>
               {progressLabel ? (
                 <p className="mt-2 text-sm font-medium text-indigo-700">当前进度：{progressLabel}</p>
-              ) : mode.id !== "AI_CUSTOM" ? (
+              ) : (
                 <p className="mt-2 text-sm text-slate-400">当前进度：未开始</p>
-              ) : null}
+              )}
               {recommendedFoundation && (
                 <p className="mt-2 text-sm font-medium text-emerald-700">推荐零基础从这里开始</p>
               )}
@@ -153,8 +152,7 @@ export default async function LearnPage({ params }: { params: Promise<{ childId:
                   </Link>
                   {modeProgress &&
                   hasModeProgress(modeProgress) &&
-                  mode.id !== "AI_CUSTOM" &&
-                  (mode.id === "FOUNDATION" || access.allowed) ? (
+                  (mode.id === "FOUNDATION" || mode.id === "AI_CUSTOM" || access.allowed) ? (
                     <Link
                       href={`/learn/${childId}/play?mode=${mode.id}&resume=1`}
                       className="block text-center text-sm text-indigo-600 hover:underline"

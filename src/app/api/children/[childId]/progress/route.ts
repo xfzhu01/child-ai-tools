@@ -10,7 +10,7 @@ import {
 import type { GameMode as ContentMode } from "@/lib/typing-engine/level-content";
 
 const patchSchema = z.object({
-  mode: z.enum(["ASSESSMENT", "ADVENTURE", "CHAIN", "FOUNDATION"]),
+  mode: z.enum(["ASSESSMENT", "ADVENTURE", "CHAIN", "FOUNDATION", "AI_CUSTOM"]),
   level: z.number().int().min(1),
   itemIndex: z.number().int().min(0),
   levelComplete: z.boolean().optional(),

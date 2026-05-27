@@ -43,7 +43,6 @@ export async function POST(request: Request) {
     const access = await canStartSession(session.user.id, child.id, body.mode);
     const isLevelComplete = Boolean(body.levelComplete);
     const shouldSaveProgress =
-      body.mode !== "AI_CUSTOM" &&
       body.levelNumber &&
       (isLevelComplete || body.itemIndex !== undefined);
 
