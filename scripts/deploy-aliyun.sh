@@ -74,7 +74,9 @@ if ! command -v docker >/dev/null 2>&1; then
   echo "ERROR: Docker not installed. Run scripts/bootstrap-aliyun-ecs.sh on the ECS first."
   exit 1
 fi
-docker compose -f docker-compose.aliyun.yml up -d --build
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+docker compose -f docker-compose.aliyun.yml up -d --build --progress=plain
 REMOTE_SCRIPT
 
 echo ""

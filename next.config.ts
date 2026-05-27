@@ -27,6 +27,12 @@ const dockerConfig: NextConfig = dockerTargets.has(deployTarget)
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  ...(process.env.SKIP_TYPE_CHECK === "1"
+    ? {
+        // CI already runs full typecheck; skip on constrained Docker hosts (Aliyun ECS).
+        typescript: { ignoreBuildErrors: true },
+      }
+    : {}),
   ...dockerConfig,
 };
 

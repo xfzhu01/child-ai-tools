@@ -27,6 +27,15 @@ fi
 
 mkdir -p ~/child-ai-tools
 
+if [[ ! -f /swapfile ]]; then
+  echo "→ Adding 2G swap (helps Docker build on small instances)..."
+  fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
 echo ""
 echo "✓ ECS ready for deploy"
 echo "  1. Aliyun 安全组放行: TCP 22, 80"
