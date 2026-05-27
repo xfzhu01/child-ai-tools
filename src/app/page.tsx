@@ -1,65 +1,86 @@
-import Image from "next/image";
+import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { getStartPath } from "@/lib/auth/start-path";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { t } from "@/lib/i18n";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
-export default function Home() {
+export default async function HomePage() {
+  const session = await auth();
+  const startPath = getStartPath(!!session?.user);
+  const startLabel = session?.user ? "进入家长中心" : t("landing.cta");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <section className="mx-auto max-w-6xl px-4 py-16 text-center md:py-24">
+        <div className="flex justify-center">
+          <BrandLogo size="lg" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <p className="mt-6 text-sm font-semibold uppercase tracking-widest text-indigo-600">
+          {t("app.tagline")}
+        </p>
+        <h1 className="mt-4 text-4xl font-black text-slate-900 md:text-6xl">
+          {t("landing.heroTitle")}
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">{t("landing.heroSubtitle")}</p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <Link href={startPath}>
+            <Button variant="child" size="lg">
+              {startLabel}
+            </Button>
+          </Link>
+          <Link href="/pricing">
+            <Button variant="secondary" size="lg">
+              查看定价
+            </Button>
+          </Link>
         </div>
-      </main>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-6 px-4 pb-12 md:grid-cols-3">
+        {[
+          { title: t("landing.feature1Title"), desc: t("landing.feature1Desc") },
+          { title: t("landing.feature2Title"), desc: t("landing.feature2Desc") },
+          { title: t("landing.feature3Title"), desc: t("landing.feature3Desc") },
+        ].map((item) => (
+          <Card key={item.title} className="bg-white/80">
+            <h3 className="text-xl font-bold text-indigo-700">{item.title}</h3>
+            <p className="mt-3 text-slate-600">{item.desc}</p>
+          </Card>
+        ))}
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <Card>
+          <h2 className="text-2xl font-bold">我们 vs 免费打字网站</h2>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="py-2">能力</th>
+                  <th className="py-2">免费打字站</th>
+                  <th className="py-2 text-indigo-700">小宝打字</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["年龄设计", "泛年龄/无分层", "6–12 岁精准分层"],
+                  ["AI 个性化", "热力图/固定课", "按键级 + LLM 定制关"],
+                  ["家长报告", "弱/无", "趋势 + 热力图 + AI 周报"],
+                  ["付费模式", "免费/校培", "¥19.9 官方关卡 + ¥49.9 AI 版"],
+                ].map(([a, b, c]) => (
+                  <tr key={a} className="border-b border-slate-100">
+                    <td className="py-3 font-medium">{a}</td>
+                    <td className="py-3 text-slate-500">{b}</td>
+                    <td className="py-3 font-semibold text-indigo-700">{c}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </section>
     </div>
   );
 }

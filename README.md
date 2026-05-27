@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 小宝打字 · 儿童 AI 打字学习平台
 
-## Getting Started
+**使命：** 小朋友的 AI 高效打字学习工具
 
-First, run the development server:
+面向 6–12 岁小学生的 AI 高效打字学习 Web 应用：游戏化闯关、按键级数据分析、AI 定制练习与家长周报。
+
+## 技术栈
+
+- **Next.js 16** (App Router) + TypeScript + Tailwind CSS
+- **Auth.js** (NextAuth v5) 邮箱登录
+- **Prisma 7** + PostgreSQL (Neon / Docker)
+- **Cloudflare Workers** via `@opennextjs/cloudflare`
+- **Vitest** + **Playwright**
+
+## 快速开始
+
+### 1. 环境变量
+
+```bash
+cp .env.example .env
+# 编辑 DATABASE_URL、AUTH_SECRET
+# AI 关卡生成（OpenAI 兼容接口，默认 DeepSeek）：LLM_API_KEY 或 DEEPSEEK_API_KEY
+openssl rand -base64 32  # 生成 AUTH_SECRET
+```
+
+### 2. 本地数据库
+
+```bash
+docker compose up -d
+npx prisma migrate deploy
+npm run db:seed
+```
+
+默认管理员：`admin@example.com` / `admin12345`  
+内测邀请码：`BETA2026`
+
+### 3. 开发
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4. 测试
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run test:unit
+npm run test:e2e
+npm run lint
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Cloudflare 部署
 
-## Learn More
+```bash
+# 配置 wrangler secrets
+npx wrangler secret put DATABASE_URL
+npx wrangler secret put AUTH_SECRET
 
-To learn more about Next.js, take a look at the following resources:
+npm run deploy:cf
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+在 Cloudflare Dashboard 购买域名并绑定 Custom Domain。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 功能概览
 
-## Deploy on Vercel
+| 模块 | 说明 |
+|------|------|
+| 首次测评 | 30–60 秒基线测评 |
+| 字母大冒险 | 单词闯关 |
+| 词语接龙 | 连击挑战 |
+| AI 定制关 | AI 智能版 · 解锁后各模式下一关由 AI/规则引擎按个人数据生成 |
+| 家长中心 | 趋势图、键位热力图、AI 周报 |
+| Admin | 手动开通订阅、生成邀请码（官方关卡版 / AI 智能版） |
+| 计费 | 免费 3 关/日 · 官方关卡版 ¥19.9 · AI 智能版 ¥49.9 |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 国内迁移
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+见 [docs/china-migration-checklist.md](docs/china-migration-checklist.md)
+
+## 项目结构
+
+```
+src/
+├── app/              # 页面与 API Routes
+├── components/       # UI、打字游戏、仪表盘
+└── lib/
+    ├── typing-engine/  # 纯 TS 打字分析（可单测）
+    ├── ai/             # 推荐引擎
+    └── billing/        # Entitlement 门控
+```

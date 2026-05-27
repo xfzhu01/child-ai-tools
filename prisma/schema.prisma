@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ExerciseSource {
+  RULE
+  AI
+}
+
+enum GameMode {
+  ASSESSMENT
+  ADVENTURE
+  CHAIN
+  FOUNDATION
+  AI_CUSTOM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  emailVerified    DateTime?
+  name             String?
+  passwordHash     String?
+  locale           String    @default("zh-CN")
+  parentPinHash    String?
+  isAdmin          Boolean   @default(false)
+  stripeCustomerId String?
+  guardianConsent  Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  children       ChildProfile[]
+  subscriptions  Subscription[]
+  entitlements   Entitlement[]
+  inviteCodes    InviteCode[]   @relation("CreatedInviteCodes")
+  redeemedInvite InviteCode?    @relation("RedeemedInvite")
+  analyticsEvents AnalyticsEvent[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model ChildProfile {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  age          Int
+  avatarUrl    String?
+  currentLevel Int      @default(1)
+  xp           Int      @default(0)
+  streakDays   Int      @default(0)
+  lastPlayedAt DateTime?
+  assessmentDone Boolean @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  typingSessions    TypingSession[]
+  achievements      Achievement[]
+  aiRecommendations AIRecommendation[]
+  dailyUsage        DailyUsage[]
+  modeProgress      ModeProgress[]
+
+  @@index([userId])
+}
+
+model ModeProgress {
+  id            String   @id @default(cuid())
+  childId       String
+  mode          GameMode
+  currentLevel  Int      @default(1)
+  maxUnlocked   Int      @default(1)
+  itemIndex     Int      @default(0)
+  levelStars    Json     @default("{}")
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+
+  child ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, mode])
+  @@index([childId])
+}
+
+model TypingSession {
+  id          String   @id @default(cuid())
+  childId     String
+  mode        GameMode
+  levelNumber Int?
+  wpm         Float    @default(0)
+  accuracy    Float    @default(0)
+  durationSec Int      @default(0)
+  stars       Int      @default(0)
+  comboMax    Int      @default(0)
+  rawEvents   Json     @default("[]")
+  errorKeys   String[] @default([])
+  slowKeys    String[] @default([])
+  createdAt   DateTime @default(now())
+
+  child             ChildProfile       @relation(fields: [childId], references: [id], onDelete: Cascade)
+  aiRecommendations AIRecommendation[]
+
+  @@index([childId, createdAt])
+}
+
+model Exercise {
+  id         String         @id @default(cuid())
+  focusKeys  String[]
+  content    String
+  difficulty Int            @default(1)
+  ageBand    String
+  source     ExerciseSource @default(RULE)
+  locale     String         @default("zh-CN")
+  createdAt  DateTime       @default(now())
+
+  @@index([source, difficulty])
+}
+
+model AIRecommendation {
+  id           String   @id @default(cuid())
+  childId      String
+  sessionId    String?
+  focusKeys    String[]
+  summary      String
+  exercises    Json
+  difficulty   Int      @default(1)
+  createdAt    DateTime @default(now())
+
+  child   ChildProfile   @relation(fields: [childId], references: [id], onDelete: Cascade)
+  session TypingSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([childId, createdAt])
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  planId    String
+  status    SubscriptionStatus @default(ACTIVE)
+  provider  String             @default("manual")
+  expiresAt DateTime?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model Entitlement {
+  id        String    @id @default(cuid())
+  userId    String
+  toolSlug  String    @default("typing")
+  tier      String    @default("pro")
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, toolSlug])
+}
+
+model Achievement {
+  id         String   @id @default(cuid())
+  childId    String
+  type       String
+  unlockedAt DateTime @default(now())
+
+  child ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, type])
+}
+
+model InviteCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  tier        String    @default("pro")
+  toolSlug    String    @default("typing")
+  maxUses     Int       @default(1)
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  createdById String
+  redeemedById String?  @unique
+  createdAt   DateTime  @default(now())
+
+  createdBy  User  @relation("CreatedInviteCodes", fields: [createdById], references: [id], onDelete: Cascade)
+  redeemedBy User? @relation("RedeemedInvite", fields: [redeemedById], references: [id])
+}
+
+model DailyUsage {
+  id        String   @id @default(cuid())
+  childId   String
+  date      DateTime @db.Date
+  sessions  Int      @default(0)
+  aiCalls   Int      @default(0)
+
+  child ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([childId, date])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  childId   String?
+  event     String
+  props     Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([event, createdAt])
+}

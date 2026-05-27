@@ -1,26 +1,235 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  font-family: ui-rounded, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ── Realistic keyboard keycap animations ── */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes kb-target-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgb(56 189 248 / 0.85),
+      0 0 14px 4px rgb(56 189 248 / 0.35),
+      0 3px 0 rgb(3 105 161 / 0.55),
+      0 5px 10px rgb(0 0 0 / 0.25),
+      inset 0 1px 0 rgb(255 255 255 / 0.85);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgb(56 189 248 / 1),
+      0 0 22px 8px rgb(56 189 248 / 0.28),
+      0 3px 0 rgb(3 105 161 / 0.55),
+      0 5px 10px rgb(0 0 0 / 0.25),
+      inset 0 1px 0 rgb(255 255 255 / 0.85);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes kb-flash-correct {
+  0% {
+    transform: translateY(0);
+    background-image: linear-gradient(180deg, #bbf7d0 0%, #4ade80 50%, #22c55e 100%);
+    border-color: #16a34a;
+  }
+  35% {
+    transform: translateY(2px);
+    background-image: linear-gradient(180deg, #86efac 0%, #22c55e 50%, #16a34a 100%);
+    border-color: #15803d;
+  }
+  100% {
+    transform: translateY(0);
+    background-image: linear-gradient(180deg, #bbf7d0 0%, #4ade80 50%, #22c55e 100%);
+    border-color: #16a34a;
+  }
+}
+
+@keyframes kb-flash-error {
+  0% {
+    transform: translateY(0);
+    background-image: linear-gradient(180deg, #fecdd3 0%, #fb7185 50%, #f43f5e 100%);
+    border-color: #e11d48;
+    box-shadow:
+      0 0 0 2px rgb(252 165 165 / 0.95),
+      0 0 16px 5px rgb(239 68 68 / 0.55),
+      0 3px 0 #991b1b,
+      inset 0 1px 0 rgb(255 255 255 / 0.35);
+    color: #fff;
+  }
+  35% {
+    transform: translateY(2px);
+    background-image: linear-gradient(180deg, #fda4af 0%, #ef4444 50%, #dc2626 100%);
+    border-color: #b91c1c;
+    box-shadow:
+      0 0 0 4px rgb(248 113 113 / 1),
+      0 0 28px 10px rgb(239 68 68 / 0.8),
+      0 1px 0 #7f1d1d,
+      inset 0 1px 0 rgb(255 255 255 / 0.2);
+    color: #fff;
+  }
+  65% {
+    transform: translateY(0);
+    background-image: linear-gradient(180deg, #fecdd3 0%, #fb7185 50%, #f43f5e 100%);
+    border-color: #e11d48;
+    box-shadow:
+      0 0 0 3px rgb(252 165 165 / 1),
+      0 0 22px 8px rgb(239 68 68 / 0.65),
+      0 3px 0 #991b1b,
+      inset 0 1px 0 rgb(255 255 255 / 0.3);
+    color: #fff;
+  }
+  100% {
+    transform: translateY(0);
+    background-image: linear-gradient(180deg, #fecdd3 0%, #fb7185 50%, #f43f5e 100%);
+    border-color: #e11d48;
+    box-shadow:
+      0 0 0 2px rgb(252 165 165 / 0.95),
+      0 0 16px 5px rgb(239 68 68 / 0.55),
+      0 3px 0 #991b1b,
+      inset 0 1px 0 rgb(255 255 255 / 0.35);
+    color: #fff;
+  }
+}
+
+.kb-animate-target {
+  animation: kb-target-glow 1.4s ease-in-out infinite;
+}
+
+.kb-animate-correct {
+  animation: kb-flash-correct 0.35s ease-out;
+}
+
+.kb-animate-error {
+  animation: kb-flash-error 0.6s ease-out;
+  color: #fff;
+}
+
+/* ── Adventure mode letter animations ── */
+
+@keyframes adventure-letter-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes adventure-letter-active {
+  0%,
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 0.8), 0 10px 24px rgb(0 0 0 / 0.18);
+  }
+  50% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 10px rgb(255 255 255 / 0.25), 0 14px 28px rgb(0 0 0 / 0.22);
+  }
+}
+
+@keyframes adventure-letter-shake {
+  0%,
+  100% {
+    transform: translateX(0) scale(1.1);
+  }
+  25% {
+    transform: translateX(-6px) scale(1.1);
+  }
+  75% {
+    transform: translateX(6px) scale(1.1);
+  }
+}
+
+@keyframes adventure-shard-fly {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(var(--scale))
+      rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+@keyframes adventure-spark-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes adventure-cloud-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(12px);
+  }
+}
+
+@keyframes adventure-celebrate-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.adventure-letter-float {
+  animation: adventure-letter-float 2.4s ease-in-out infinite;
+}
+
+.adventure-letter-active {
+  animation: adventure-letter-active 1s ease-in-out infinite;
+}
+
+.adventure-letter-shake {
+  animation: adventure-letter-shake 0.35s ease-in-out;
+}
+
+.adventure-shard {
+  animation: adventure-shard-fly 0.5s ease-out forwards;
+}
+
+.adventure-spark {
+  animation: adventure-spark-pop 0.5s ease-out forwards;
+}
+
+.adventure-cloud {
+  animation: adventure-cloud-drift 6s ease-in-out infinite;
+}
+
+.adventure-celebrate > div {
+  animation: adventure-celebrate-pop 0.35s ease-out;
+}
+
+@keyframes ui-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: ui-shake 0.35s ease-in-out;
 }

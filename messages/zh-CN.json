@@ -1,0 +1,61 @@
+{
+  "app": {
+    "name": "小宝打字",
+    "tagline": "小朋友的 AI 高效打字学习工具",
+    "mission": "不是盲练打字，是 AI 帮小朋友练对、练快"
+  },
+  "nav": {
+    "home": "首页",
+    "pricing": "定价",
+    "dashboard": "家长中心",
+    "login": "登录",
+    "register": "注册",
+    "learn": "开始学习",
+    "settings": "设置",
+    "help": "帮助",
+    "admin": "管理"
+  },
+  "landing": {
+    "heroTitle": "6–12 岁小朋友的 AI 高效打字学习",
+    "heroSubtitle": "AI 分析每一键，只练弱项、少重复、进步快。闯关游戏孩子爱练，家长周报一眼看懂。",
+    "cta": "免费开始",
+    "feature1Title": "AI 高效练打字",
+    "feature1Desc": "按键级数据分析，弱项一键生成练习，告别盲目重复。",
+    "feature2Title": "专为 6–12 岁设计",
+    "feature2Desc": "从基础指法到词句挑战，按年龄梯度科学进阶。",
+    "feature3Title": "家长看得懂",
+    "feature3Desc": "进步趋势、键位热力图、AI 周报，一眼知道该怎么练。"
+  },
+  "pricing": {
+    "free": "免费版",
+    "basic": "官方关卡版",
+    "ai": "AI 智能版",
+    "pro": "AI 智能版",
+    "bundle": "成长包",
+    "bundleNote": "成长包即将推出；已开通 AI 智能版的用户可免费获取"
+  },
+  "dashboard": {
+    "title": "家长中心",
+    "addChild": "添加孩子",
+    "weeklyReport": "AI 周报",
+    "progress": "进步趋势"
+  },
+  "learn": {
+    "assessment": "首次测评",
+    "adventure": "字母大冒险",
+    "chain": "词语接龙",
+    "foundation": "零基础指法",
+    "aiCustom": "AI 定制关"
+  },
+  "game": {
+    "start": "开始",
+    "pause": "暂停",
+    "finish": "完成",
+    "accuracy": "准确率",
+    "wpm": "速度",
+    "stars": "星级",
+    "combo": "连击",
+    "great": "太棒了！",
+    "tryAgain": "再试一次"
+  }
+}
