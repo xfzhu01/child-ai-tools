@@ -1,7 +1,8 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+# postinstall runs prisma generate before schema files exist in this stage
+RUN npm ci --ignore-scripts
 
 FROM node:22-alpine AS builder
 WORKDIR /app
