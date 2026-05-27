@@ -43,7 +43,8 @@ npm run db:bootstrap
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 记录 **Account ID**（Workers 概览页右侧）
-3. 创建 API Token：[Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
+3. **启用 Workers Paid 计划**（$5/月）— 本应用 OpenNext 包约 **3.6 MiB（gzip）**，超过 Free 版 3 MiB 上限；Paid 版上限 10 MiB
+4. 创建 API Token：[Profile → API Tokens](https://dash.cloudflare.com/profile/api-tokens)
    - 模板：**Edit Cloudflare Workers**
    - 权限：`Account.Workers Scripts:Edit`、`Account.Account Settings:Read`
 
@@ -149,6 +150,17 @@ curl https://你的域名/api/health
 ---
 
 ## 常见问题
+
+### Worker 体积超限（code 10027）
+
+- Free 计划 gzip 上限 **3 MiB**；本栈（Next.js + Prisma + Auth）约 **3.6 MiB**
+- 在 Dashboard → Workers → Plans 升级到 **Paid**
+- 部署脚本会在上传前打印 bundle 体积
+
+### OpenNext 构建失败（pg-cloudflare / middleware）
+
+- 使用 `src/middleware.ts` + `export const runtime = "experimental-edge"`（不要用 `proxy.ts`）
+- `next.config.ts` 需包含 `outputFileTracingIncludes` 以打包 `pg-cloudflare`（已配置）
 
 ### 数据库连接失败
 

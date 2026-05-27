@@ -9,7 +9,7 @@
 - **Next.js 16** (App Router) + TypeScript + Tailwind CSS
 - **Auth.js** (NextAuth v5) 邮箱登录
 - **Prisma 7** + PostgreSQL (Neon / Docker)
-- **Cloudflare Workers** via `@opennextjs/cloudflare`
+- **Vercel**（推荐内测）或 **Cloudflare Workers**（可选，需 Paid）
 - **Vitest** + **Playwright**
 
 ## 快速开始
@@ -50,31 +50,27 @@ npm run lint
 npm run build
 ```
 
-## 内测上线（Cloudflare + Neon）
+## 内测上线（Vercel + Neon，推荐）
 
-**逐步指南：** [docs/beta-neon-cloudflare.md](docs/beta-neon-cloudflare.md)
+**逐步指南：** [docs/beta-neon-vercel.md](docs/beta-neon-vercel.md)
 
 ```bash
+npx vercel login
 export DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require"
 npm run db:bootstrap          # 首次：迁移 + seed
-npm run verify:release        # 发布前自检
-npm run deploy:cf             # 或 push main 触发 CI
+FIRST_DEPLOY=1 npm run deploy:beta
+# 拿到 URL 后设置 AUTH_URL，再运行 npm run deploy:beta
 ```
 
 总览：[docs/launch-runbook.md](docs/launch-runbook.md)
 
-## Cloudflare 部署
+## Cloudflare Workers（可选）
+
+需 Workers Paid（约 3.6 MiB gzip）。见 [docs/beta-neon-cloudflare.md](docs/beta-neon-cloudflare.md)
 
 ```bash
-# 配置 wrangler secrets
-npx wrangler secret put DATABASE_URL
-npx wrangler secret put AUTH_SECRET
-npx wrangler secret put LLM_API_KEY
-
-npm run deploy:cf
+DEPLOY_TARGET=cloudflare npm run deploy:cf
 ```
-
-在 Cloudflare Dashboard 购买域名并绑定 Custom Domain。生产环境还需设置 `AUTH_URL` 与 `NEXT_PUBLIC_APP_URL`。
 
 ## 功能概览
 

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "build": {
+    "env": {
+      "LLM_API_URL": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      "LLM_MODEL": "glm-4-flash-250414",
+      "DATABASE_POOL_MAX": "1"
+    }
+  }
+}
