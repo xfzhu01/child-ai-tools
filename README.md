@@ -50,14 +50,18 @@ npm run lint
 npm run build
 ```
 
-## 内测上线
+## 内测上线（Cloudflare + Neon）
 
-完整步骤见 **[docs/launch-runbook.md](docs/launch-runbook.md)**（Phase 1–4：内测 → 稳定 → 付费 → 备案）。
+**逐步指南：** [docs/beta-neon-cloudflare.md](docs/beta-neon-cloudflare.md)
 
 ```bash
-npm run verify:release   # 发布前自检
-npm run deploy:cf        # 部署到 Cloudflare Workers
+export DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require"
+npm run db:bootstrap          # 首次：迁移 + seed
+npm run verify:release        # 发布前自检
+npm run deploy:cf             # 或 push main 触发 CI
 ```
+
+总览：[docs/launch-runbook.md](docs/launch-runbook.md)
 
 ## Cloudflare 部署
 

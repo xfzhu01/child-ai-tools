@@ -43,10 +43,14 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
-  deploy-preview:
+  deploy-beta:
+    name: Deploy to Cloudflare Workers
     needs: test
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,11 +58,23 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx opennextjs-cloudflare build
+      - name: Build OpenNext for Cloudflare
+        run: npx opennextjs-cloudflare build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           AUTH_URL: ${{ secrets.AUTH_URL }}
-      - run: npx wrangler deploy
+          NEXT_PUBLIC_APP_URL: ${{ secrets.AUTH_URL }}
+          LLM_API_URL: https://open.bigmodel.cn/api/paas/v4/chat/completions
+          LLM_MODEL: glm-4-flash-250414
+      - name: Sync Worker secrets
+        run: |
+          printf '%s' "$DATABASE_URL" | npx wrangler secret put DATABASE_URL
+          printf '%s' "$AUTH_SECRET" | npx wrangler secret put AUTH_SECRET
+          printf '%s' "$LLM_API_KEY" | npx wrangler secret put LLM_API_KEY
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      - name: Deploy Worker
+        run: npx wrangler deploy

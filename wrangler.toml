@@ -3,9 +3,18 @@ main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# Set account_id via CLOUDFLARE_ACCOUNT_ID env or `wrangler whoami`
+# account_id = ""
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
 
 [vars]
 NEXT_PUBLIC_APP_NAME = "小宝打字"
+# Override at build time via AUTH_URL / NEXT_PUBLIC_APP_URL in CI or local deploy
+NEXT_PUBLIC_APP_URL = "http://localhost:3000"
+LLM_API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+LLM_MODEL = "glm-4-flash-250414"
+# Serverless-friendly pool size for Neon on Workers
+DATABASE_POOL_MAX = "1"

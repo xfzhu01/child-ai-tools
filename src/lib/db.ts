@@ -17,7 +17,14 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL is not set");
   }
 
-  const pool = globalForPrisma.pool ?? new Pool({ connectionString });
+  const pool =
+    globalForPrisma.pool ??
+    new Pool({
+      connectionString,
+      max: process.env.DATABASE_POOL_MAX ? Number(process.env.DATABASE_POOL_MAX) : 10,
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 10_000,
+    });
   if (process.env.NODE_ENV !== "production") {
     globalForPrisma.pool = pool;
   }
