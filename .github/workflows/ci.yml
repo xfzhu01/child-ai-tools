@@ -68,13 +68,29 @@ jobs:
           node-version: 22
       - name: Validate deploy secrets
         run: |
-          test -n "$VERCEL_TOKEN" || (echo "Missing GitHub secret: VERCEL_TOKEN" && exit 1)
-          test -n "$VERCEL_ORG_ID" || (echo "Missing GitHub secret: VERCEL_ORG_ID" && exit 1)
-          test -n "$VERCEL_PROJECT_ID" || (echo "Missing GitHub secret: VERCEL_PROJECT_ID" && exit 1)
-          test -n "$DATABASE_URL" || (echo "Missing GitHub secret: DATABASE_URL" && exit 1)
-          test -n "$AUTH_SECRET" || (echo "Missing GitHub secret: AUTH_SECRET" && exit 1)
-          test -n "$AUTH_URL" || (echo "Missing GitHub secret: AUTH_URL" && exit 1)
-          test -n "$LLM_API_KEY" || (echo "Missing GitHub secret: LLM_API_KEY" && exit 1)
+          missing=0
+          check() {
+            if [[ -z "${!1:-}" ]]; then
+              echo "Missing GitHub secret: $1"
+              missing=1
+            fi
+          }
+          check VERCEL_TOKEN
+          check VERCEL_ORG_ID
+          check VERCEL_PROJECT_ID
+          check DATABASE_URL
+          check AUTH_SECRET
+          check AUTH_URL
+          check LLM_API_KEY
+          if (( missing )); then
+            echo ""
+            echo "Add secrets at:"
+            echo "https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo ""
+            echo "Or run locally after 'gh auth login' and VERCEL_TOKEN in .env:"
+            echo "  npm run deploy:github-secrets"
+            exit 1
+          fi
       - name: Sync Vercel env from GitHub secrets
         run: bash scripts/sync-vercel-env-ci.sh
       - name: Deploy to Vercel
