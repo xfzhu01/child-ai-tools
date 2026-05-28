@@ -55,11 +55,11 @@ function getBurstTiming(mode: GameMode): BurstTiming {
   }
   if (mode === "AI_CUSTOM") {
     return {
-      shatterMs: 260,
-      celebrateMs: 360,
-      flashCorrectMs: 140,
-      flashErrorMs: 320,
-      errorShakeMs: 260,
+      shatterMs: 180,
+      celebrateMs: 250,
+      flashCorrectMs: 120,
+      flashErrorMs: 250,
+      errorShakeMs: 200,
     };
   }
   return {
