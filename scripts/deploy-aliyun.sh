@@ -2,6 +2,19 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [[ -f "$ROOT/.env.deploy" && ! -f "$ROOT/.env" ]]; then
+  cat <<'EOF'
+ERROR: deploy-aliyun.sh must run on your Mac (with a local .env), not on the ECS server.
+
+The server already has .env.deploy from a previous sync. To rebuild there, run:
+
+  cd ~/child-ai-tools
+  bash scripts/aliyun-remote-up.sh
+EOF
+  exit 1
+fi
+
 # shellcheck disable=SC1091
 source "$ROOT/scripts/load-deploy-env.sh"
 
@@ -56,6 +69,7 @@ RSYNC_SSH="ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=accept-new -o Connect
 echo "→ Syncing code to $REMOTE:$REMOTE_DIR ..."
 rsync -az --delete \
   -e "$RSYNC_SSH" \
+  --chmod=Du=rwx,Dgo=rx,Fu=rwX,Fgo=rX \
   --exclude node_modules \
   --exclude .git \
   --exclude .next \
@@ -67,17 +81,7 @@ rsync -az --delete \
 scp -i "$SSH_KEY_FILE" -o StrictHostKeyChecking=accept-new "$ENV_FILE" "$REMOTE:$REMOTE_DIR/.env.deploy"
 
 echo "→ Building and starting containers on Aliyun ECS..."
-"${SSH_CMD[@]}" "$REMOTE" bash -s <<'REMOTE_SCRIPT'
-set -euo pipefail
-cd ~/child-ai-tools
-if ! command -v docker >/dev/null 2>&1; then
-  echo "ERROR: Docker not installed. Run scripts/bootstrap-aliyun-ecs.sh on the ECS first."
-  exit 1
-fi
-export DOCKER_BUILDKIT=1
-export COMPOSE_DOCKER_CLI_BUILD=1
-docker compose -f docker-compose.aliyun.yml up -d --build --progress=plain
-REMOTE_SCRIPT
+"${SSH_CMD[@]}" "$REMOTE" "bash $REMOTE_DIR/scripts/aliyun-remote-up.sh"
 
 echo ""
 echo "✓ Aliyun deploy complete"

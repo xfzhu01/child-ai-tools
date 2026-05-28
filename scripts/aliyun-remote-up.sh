@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Run ON the Aliyun ECS after code + .env.deploy are synced from your Mac.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+if [[ ! -f "$ROOT/.env.deploy" ]]; then
+  echo "ERROR: $ROOT/.env.deploy not found."
+  echo "Run npm run deploy:aliyun from your Mac first (it uploads .env.deploy)."
+  exit 1
+fi
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "ERROR: Docker not installed. Run scripts/bootstrap-aliyun-ecs.sh first."
+  exit 1
+fi
+
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+docker compose -f docker-compose.aliyun.yml up -d --build --progress=plain
+
+echo ""
+echo "✓ Containers started"
+echo "  Health: curl http://127.0.0.1/api/health  (via nginx on port 80)"
