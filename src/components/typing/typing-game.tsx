@@ -204,6 +204,10 @@ function usesBurstTyping(mode: GameMode) {
   return mode === "ADVENTURE" || mode === "AI_CUSTOM";
 }
 
+function isKeyRain(mode: GameMode, gameType?: AiMiniGameType) {
+  return mode === "AI_CUSTOM" && gameType === "key_rain";
+}
+
 export function TypingGame({
   childId,
   mode,
@@ -373,6 +377,12 @@ export function TypingGame({
 
   const advanceAfterItem = useCallback(
     (nextItemIndex: number) => {
+      if (isKeyRain(mode, aiGameType)) {
+        clearShatterTimers();
+        void goToNextItem(nextItemIndex);
+        return;
+      }
+
       if (usesBurstTyping(mode)) {
         setCelebrating(true);
         celebrateTimer.current = setTimeout(() => {
@@ -385,7 +395,7 @@ export function TypingGame({
 
       void goToNextItem(nextItemIndex);
     },
-    [clearShatterTimers, goToNextItem, mode],
+    [aiGameType, clearShatterTimers, goToNextItem, mode],
   );
 
   const handleBackspace = useCallback(() => {
@@ -510,6 +520,15 @@ export function TypingGame({
     stars,
     totalItems,
   ]);
+
+  useEffect(() => {
+    if (!finished || !isKeyRain(mode, aiGameType)) return;
+    const timer = setTimeout(() => {
+      void submit();
+    }, 1500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, mode, aiGameType]);
 
   const submit = useCallback(async () => {
     if (submitting) return;

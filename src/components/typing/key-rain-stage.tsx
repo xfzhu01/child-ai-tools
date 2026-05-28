@@ -1,53 +1,8 @@
 "use client";
 
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { MINI_GAME_META } from "@/lib/ai/mini-games";
 import { cn } from "@/lib/utils";
-
-const RAIN_CHARS = "abcdefghijklmnopqrstuvwxyz";
-
-type RainDrop = {
-  id: number;
-  char: string;
-  left: number;
-  delay: number;
-  duration: number;
-  size: "sm" | "md";
-  drift: number;
-};
-
-function hashSeed(input: string) {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-  }
-  return hash;
-}
-
-function buildRainDrops(seed: number, count: number, exclude: string): RainDrop[] {
-  const drops: RainDrop[] = [];
-  let state = seed || 1;
-
-  for (let i = 0; i < count; i++) {
-    state = (state * 1664525 + 1013904223) >>> 0;
-    let char = RAIN_CHARS[state % RAIN_CHARS.length]!;
-    if (char === exclude && RAIN_CHARS.length > 1) {
-      char = RAIN_CHARS[(state >> 8) % RAIN_CHARS.length]!;
-    }
-    state = (state * 1664525 + 1013904223) >>> 0;
-    drops.push({
-      id: i,
-      char,
-      left: 4 + (state % 9200) / 100,
-      delay: ((state >> 4) % 280) / 100,
-      duration: 2.2 + ((state >> 10) % 18) / 10,
-      size: (state >> 14) % 3 === 0 ? "md" : "sm",
-      drift: -6 + ((state >> 6) % 13),
-    });
-  }
-
-  return drops;
-}
 
 type Props = {
   gameTitle?: string;
@@ -68,108 +23,117 @@ export function KeyRainStage({
   gameEmoji,
   levelTitle,
   targetText,
-  hint,
   typedLength,
   itemRound,
   totalRounds,
   combo,
-  celebrating,
   errorShake,
 }: Props) {
   const meta = MINI_GAME_META.key_rain;
   const title = gameTitle ?? meta.title;
   const emoji = gameEmoji ?? meta.emoji;
   const targetLetter = (targetText[0] ?? "a").toLowerCase();
-  const isDone = typedLength >= targetText.length;
-  const isActive = !isDone && !celebrating;
+  const caught = typedLength >= targetText.length;
 
-  const rainDrops = useMemo(
-    () => buildRainDrops(hashSeed(`${itemRound}:${targetLetter}`), 22, targetLetter),
-    [itemRound, targetLetter],
-  );
+  const [flashLetter, setFlashLetter] = useState<string | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const prevRound = useRef(itemRound);
+
+  useEffect(() => {
+    if (itemRound > prevRound.current) {
+      setFlashLetter(targetText[0]?.toLowerCase() ?? null);
+      flashTimer.current = setTimeout(() => setFlashLetter(null), 300);
+      prevRound.current = itemRound;
+    }
+    return () => {
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+    };
+  }, [itemRound, targetText]);
+
+  const progress = ((itemRound - 1) / totalRounds) * 100;
 
   return (
     <div
       className={cn(
-        "rounded-3xl bg-gradient-to-br from-slate-800 via-indigo-900 to-violet-900 p-6 text-white shadow-xl md:p-8",
-        errorShake && "animate-[shake_0.35s_ease-in-out]",
+        "rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-violet-950 p-5 text-white shadow-xl md:p-7",
+        errorShake && "animate-[shake_0.3s_ease-in-out]",
       )}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm opacity-95">
-        <span>
-          {emoji} {title} · 第 {itemRound}/{totalRounds} 滴
+      {/* Header */}
+      <div className="mb-3 flex items-center justify-between text-sm">
+        <span className="font-bold">
+          {emoji} {title}
         </span>
-        <span>连击 {combo}</span>
+        <span className="text-xs text-indigo-300">{levelTitle}</span>
       </div>
-      <p className="text-xs opacity-90">{levelTitle}</p>
-      <p className="mt-1 text-sm font-medium text-indigo-200">{meta.description}</p>
-      {hint ? <p className="mt-2 text-sm text-amber-200">{hint}</p> : null}
 
-      <div className="key-rain-arena relative mt-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-slate-950/40 via-indigo-950/30 to-violet-950/50 shadow-inner">
-        <div className="key-rain-sky pointer-events-none absolute inset-0" aria-hidden>
-          {rainDrops.map((drop) => (
+      {/* Progress bar */}
+      <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-200"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      {/* Main arena */}
+      <div className="relative flex min-h-[200px] flex-col items-center justify-center">
+        {/* Caught flash effect */}
+        {flashLetter ? (
+          <span
+            key={`flash-${itemRound}`}
+            className="pointer-events-none absolute text-7xl font-black uppercase text-emerald-400/60 animate-[ping_0.4s_ease-out_forwards]"
+          >
+            {flashLetter}
+          </span>
+        ) : null}
+
+        {/* Target letter */}
+        {!caught ? (
+          <div
+            key={`target-${itemRound}-${targetLetter}`}
+            className="flex flex-col items-center gap-4"
+          >
             <span
-              key={drop.id}
-              className={cn(
-                "key-rain-drop absolute top-0 font-bold text-white/50",
-                drop.size === "md" ? "text-lg" : "text-sm",
-              )}
-              style={
-                {
-                  left: `${drop.left}%`,
-                  "--fall-delay": `${drop.delay}s`,
-                  "--fall-duration": `${drop.duration}s`,
-                  "--fall-drift": `${drop.drift}px`,
-                } as CSSProperties
-              }
-            >
-              {drop.char}
-            </span>
-          ))}
-        </div>
-
-        <div className="key-rain-mist pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white/10 to-transparent" />
-        <div className="key-rain-ground pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-violet-500/25 to-transparent" />
-
-        <div className="relative min-h-[220px] px-4 pb-6 pt-4">
-          <p className="pointer-events-none absolute inset-x-0 top-3 z-10 text-center text-xs font-medium uppercase tracking-[0.2em] text-indigo-200/80">
-            接住这滴字母雨
-          </p>
-
-          {isActive ? (
-            <span
-              key={`${itemRound}-${targetLetter}-fall`}
-              className="key-rain-target key-rain-target--falling absolute left-1/2 z-20 flex h-16 w-16 -translate-x-1/2 items-center justify-center rounded-2xl border-2 border-yellow-300/90 bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-400 text-4xl font-black uppercase text-slate-900 shadow-[0_8px_28px_rgb(250_204_21/0.5)]"
+              className="flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-amber-300/80 bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-400 text-5xl font-black uppercase text-slate-900 shadow-[0_0_40px_rgb(250_204_21/0.4)] animate-[bounce_1.5s_ease-in-out_infinite]"
+              style={{ "--tw-bounce-transform": "translateY(-8px)" } as CSSProperties}
             >
               {targetLetter}
             </span>
-          ) : null}
-
-          {(isDone || celebrating) && (
-            <div className="absolute inset-x-0 bottom-6 z-20 flex flex-col items-center">
-              <span
-                key={`${itemRound}-${targetLetter}-caught`}
-                className="key-rain-target key-rain-target--caught flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-300 to-green-500 text-4xl font-black uppercase text-white shadow-[0_8px_24px_rgb(16_185_129/0.45)]"
-              >
+            <p className="text-sm font-medium text-indigo-200">
+              按{" "}
+              <kbd className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/10 font-mono text-base font-bold uppercase text-amber-200">
                 {targetLetter}
-              </span>
-              <p className="mt-4 text-sm text-emerald-100">接住了！</p>
-            </div>
-          )}
-
-          {isActive ? (
-            <div className="absolute inset-x-0 bottom-6 z-10 flex flex-col items-center">
-              <div className="key-rain-catch-zone h-1 w-24 rounded-full bg-yellow-300/70" />
-              <p className="mt-4 text-sm text-indigo-100/90">
-                按键盘{" "}
-                <kbd className="rounded-lg border border-white/20 bg-white/10 px-2 py-0.5 font-mono text-base font-bold uppercase text-yellow-200">
-                  {targetLetter}
-                </kbd>
-              </p>
-            </div>
-          ) : null}
-        </div>
+              </kbd>
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-4xl">✅</span>
+            <p className="text-sm font-bold text-emerald-300">全部接住！</p>
+          </div>
+        )}
       </div>
+
+      {/* Footer stats */}
+      <div className="mt-4 flex items-center justify-between text-xs">
+        <span className="text-indigo-300">
+          第 {itemRound}/{totalRounds} 个
+        </span>
+        <span
+          className={cn(
+            "font-bold tabular-nums transition-colors",
+            combo >= 5 ? "text-amber-300" : combo >= 3 ? "text-emerald-300" : "text-indigo-300",
+          )}
+        >
+          {combo > 0 ? `🔥 连击 ${combo}` : "连击 0"}
+        </span>
+      </div>
+
+      {caught ? (
+        <p className="mt-3 text-center text-xs text-indigo-400 animate-pulse">
+          自动继续中...
+        </p>
+      ) : null}
     </div>
   );
 }
