@@ -18,7 +18,10 @@ fi
 
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
-docker compose -f docker-compose.aliyun.yml up -d --build --progress=plain
+export BUILDKIT_PROGRESS=plain
+
+docker compose -f docker-compose.aliyun.yml build
+docker compose -f docker-compose.aliyun.yml up -d
 
 echo ""
 echo "✓ Containers started"
