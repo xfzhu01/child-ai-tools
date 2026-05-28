@@ -2,8 +2,7 @@ services:
   app:
     build:
       context: .
-      args:
-        DEPLOY_TARGET: aliyun
+      dockerfile: Dockerfile.prebuilt
     restart: unless-stopped
     env_file:
       - .env.deploy

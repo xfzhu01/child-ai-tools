@@ -80,6 +80,8 @@ npm run deploy:aliyun
 DEPLOY_TARGET=aliyun npm run deploy:beta
 ```
 
+**说明：** `next build` 在 **本机 Mac**（或 GitHub Actions）执行，ECS 只打包已构建好的 `.next/standalone`，避免小硬盘实例在 Docker 里编译导致磁盘 I/O 飙升、系统卡死。
+
 验收：
 
 ```bash

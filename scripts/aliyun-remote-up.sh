@@ -16,10 +16,16 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ ! -f "$ROOT/.next/standalone/server.js" ]]; then
+  echo "ERROR: Missing prebuilt .next/standalone — run npm run deploy:aliyun from your Mac."
+  exit 1
+fi
+
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 export BUILDKIT_PROGRESS=plain
 
+echo "→ Packaging prebuilt app (no npm run build on ECS)..."
 docker compose -f docker-compose.aliyun.yml build
 if ! docker compose -f docker-compose.aliyun.yml up -d; then
   echo ""

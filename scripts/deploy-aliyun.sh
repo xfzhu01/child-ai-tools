@@ -76,6 +76,9 @@ fi
 SSH_CMD=(ssh "${SSH_OPTS[@]}")
 RSYNC_SSH="ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"
 
+echo "→ Building on local machine (Next.js build is too heavy for small ECS disks)..."
+bash "$ROOT/scripts/build-aliyun-artifacts.sh"
+
 echo "→ Syncing code to $REMOTE:$REMOTE_DIR ..."
 rsync -az --delete \
   -e "$RSYNC_SSH" \
@@ -87,6 +90,14 @@ rsync -az --delete \
   --exclude .env \
   --exclude .env.deploy \
   "$ROOT/" "$REMOTE:$REMOTE_DIR/"
+
+echo "→ Syncing prebuilt .next artifacts..."
+rsync -az \
+  -e "$RSYNC_SSH" \
+  "$ROOT/.next/standalone/" "$REMOTE:$REMOTE_DIR/.next/standalone/"
+rsync -az \
+  -e "$RSYNC_SSH" \
+  "$ROOT/.next/static/" "$REMOTE:$REMOTE_DIR/.next/static/"
 
 scp -i "$SSH_KEY_FILE" -o StrictHostKeyChecking=accept-new "$ENV_FILE" "$REMOTE:$REMOTE_DIR/.env.deploy"
 
