@@ -120,12 +120,18 @@ function loadItem(
   level: number,
   itemIndex: number,
   aiLevelItems?: AiLevelItem[],
+  gameType?: AiMiniGameType,
 ): { text: string; meta: LevelMeta } | null {
   const aiItem = aiLevelItems?.[itemIndex];
   if (aiItem) {
     if (mode === "AI_CUSTOM") {
+      let text = normalizeTypingText(aiItem.text);
+      if (gameType === "key_rain") {
+        const letter = text.replace(/\s/g, "")[0];
+        text = letter ?? text[0] ?? "a";
+      }
       return {
-        text: normalizeTypingText(aiItem.text),
+        text,
         meta: {
           levelTitle: getLevelTitle(mode, level),
           aiPrompt: aiItem.prompt ? normalizeTypingText(aiItem.prompt) : undefined,
@@ -223,8 +229,8 @@ export function TypingGame({
   onComplete,
 }: Props) {
   const initial = useMemo(
-    () => loadItem(mode, level, startItemIndex, aiLevelItems),
-    [mode, level, startItemIndex, aiLevelItems],
+    () => loadItem(mode, level, startItemIndex, aiLevelItems, aiGameType),
+    [mode, level, startItemIndex, aiLevelItems, aiGameType],
   );
 
   const itemsPerLevel = aiLevelItems?.length ?? getItemsPerLevel(mode, level);
@@ -353,7 +359,7 @@ export function TypingGame({
         return;
       }
 
-      const next = loadItem(mode, level, nextItemIndex, aiLevelItems);
+      const next = loadItem(mode, level, nextItemIndex, aiLevelItems, aiGameType);
       if (!next) {
         setFinished(true);
         setLevelComplete(true);
@@ -372,7 +378,7 @@ export function TypingGame({
         await saveCheckpointQuietly({ level, itemIndex: nextItemIndex });
       }
     },
-    [aiLevelItems, clearShatterTimers, level, mode, saveCheckpointQuietly, totalItems],
+    [aiGameType, aiLevelItems, clearShatterTimers, level, mode, saveCheckpointQuietly, totalItems],
   );
 
   const advanceAfterItem = useCallback(
@@ -521,15 +527,6 @@ export function TypingGame({
     totalItems,
   ]);
 
-  useEffect(() => {
-    if (!finished || !isKeyRain(mode, aiGameType)) return;
-    const timer = setTimeout(() => {
-      void submit();
-    }, 1500);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, mode, aiGameType]);
-
   const submit = useCallback(async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -567,6 +564,14 @@ export function TypingGame({
     submitting,
     totalItems,
   ]);
+
+  useEffect(() => {
+    if (!finished || !isKeyRain(mode, aiGameType)) return;
+    const timer = setTimeout(() => {
+      void submit();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [finished, mode, aiGameType, submit]);
 
   const onKeyboardInput = useCallback(
     (rawKey: string) => {
