@@ -91,6 +91,9 @@ rsync -az --delete \
   --exclude .env.deploy \
   "$ROOT/" "$REMOTE:$REMOTE_DIR/"
 
+echo "→ Ensuring remote .next directories exist..."
+"${SSH_CMD[@]}" "$REMOTE" "mkdir -p $REMOTE_DIR/.next/standalone $REMOTE_DIR/.next/static"
+
 echo "→ Syncing prebuilt .next artifacts..."
 rsync -az \
   -e "$RSYNC_SSH" \
