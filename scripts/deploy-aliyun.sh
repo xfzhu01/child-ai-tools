@@ -49,19 +49,29 @@ REMOTE_DIR="${ALIYUN_REMOTE_DIR:-~/child-ai-tools}"
 echo "→ Writing remote env file..."
 ENV_FILE="$(mktemp)"
 trap 'rm -f "$ENV_FILE" "$SSH_KEY_FILE"' EXIT
-cat > "$ENV_FILE" <<EOF
-DATABASE_URL=$DATABASE_URL
-AUTH_SECRET=$AUTH_SECRET
-AUTH_URL=$ALIYUN_AUTH_URL
-AUTH_TRUST_HOST=true
-NEXT_PUBLIC_APP_URL=$ALIYUN_AUTH_URL
-NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
-LLM_API_KEY=$LLM_API_KEY
-LLM_API_URL=$LLM_API_URL
-LLM_MODEL=$LLM_MODEL
-DATABASE_POOL_MAX=$DATABASE_POOL_MAX
-ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
-EOF
+
+if [[ -z "${DATABASE_URL:-}" ]]; then
+  echo "ERROR: DATABASE_URL is empty. Set DATABASE_URL or DATABASE_URL_POOLED in .env"
+  exit 1
+fi
+
+{
+  printf 'DATABASE_URL=%s\n' "$DATABASE_URL"
+  printf 'AUTH_SECRET=%s\n' "$AUTH_SECRET"
+  printf 'AUTH_URL=%s\n' "$ALIYUN_AUTH_URL"
+  printf 'AUTH_TRUST_HOST=true\n'
+  printf 'NEXT_PUBLIC_APP_URL=%s\n' "$ALIYUN_AUTH_URL"
+  printf 'NEXT_PUBLIC_APP_NAME=%s\n' "$NEXT_PUBLIC_APP_NAME"
+  printf 'LLM_API_KEY=%s\n' "$LLM_API_KEY"
+  printf 'LLM_API_URL=%s\n' "$LLM_API_URL"
+  printf 'LLM_MODEL=%s\n' "$LLM_MODEL"
+  printf 'DATABASE_POOL_MAX=%s\n' "$DATABASE_POOL_MAX"
+  printf 'ADMIN_EMAIL=%s\n' "${ADMIN_EMAIL:-admin@example.com}"
+} > "$ENV_FILE"
+
+if [[ "$DATABASE_URL" != *"sslmode=require"* ]]; then
+  echo "WARN: DATABASE_URL should include sslmode=require for Neon"
+fi
 
 SSH_CMD=(ssh "${SSH_OPTS[@]}")
 RSYNC_SSH="ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15"

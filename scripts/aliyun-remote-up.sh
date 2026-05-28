@@ -21,8 +21,14 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 export BUILDKIT_PROGRESS=plain
 
 docker compose -f docker-compose.aliyun.yml build
-docker compose -f docker-compose.aliyun.yml up -d
+if ! docker compose -f docker-compose.aliyun.yml up -d; then
+  echo ""
+  echo "ERROR: compose up failed. Recent app logs:"
+  docker compose -f docker-compose.aliyun.yml logs app --tail 50 || true
+  exit 1
+fi
 
 echo ""
 echo "✓ Containers started"
-echo "  Health: curl http://127.0.0.1/api/health  (via nginx on port 80)"
+echo "  Liveness: curl http://127.0.0.1/api/health/live"
+echo "  Database: curl http://127.0.0.1/api/health"
