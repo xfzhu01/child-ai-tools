@@ -23,8 +23,8 @@ export type NumberKey = (typeof NUMBER_ROW)[number];
 export type PunctuationKey = (typeof PUNCTUATION_ROW)[number];
 export type KeyboardKey = LetterKey | NumberKey | PunctuationKey | SpecialKey;
 
-/** Uniform scale factor for key size, gaps, and keycap styling. */
-const KB_SCALE = 2;
+/** Uniform scale factor for key size, gaps, and keycap styling (default 2, −10%). */
+const KB_SCALE = 1.8;
 
 const UNIT_W = "var(--kb-u)";
 const TAB_W = "calc(1.5 * var(--kb-u))";

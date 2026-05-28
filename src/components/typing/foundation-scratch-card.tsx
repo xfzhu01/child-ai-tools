@@ -8,7 +8,8 @@ type Props = {
   stars: number;
   isCurrent: boolean;
   canStart: boolean;
-  childId: string;
+  childId?: string;
+  playHref?: string;
 };
 
 export function FoundationScratchCard({
@@ -18,6 +19,7 @@ export function FoundationScratchCard({
   isCurrent,
   canStart,
   childId,
+  playHref,
 }: Props) {
   const meta = getFoundationLevel(level);
   if (!meta) return null;
@@ -67,7 +69,10 @@ export function FoundationScratchCard({
         </p>
 
         {unlocked && canStart ? (
-          <Link href={`/learn/${childId}/play?mode=FOUNDATION&level=${level}`} className="mt-3 block">
+          <Link
+            href={playHref ?? `/learn/${childId}/play?mode=FOUNDATION&level=${level}`}
+            className="mt-3 block"
+          >
             <Button variant="child" className="w-full text-sm">
               {isCurrent ? "继续" : "刮开练习"}
             </Button>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { hasAiAccess } from "@/lib/billing/entitlements";
+import { hasReportAccess } from "@/lib/billing/entitlements";
 import { buildRecommendation } from "@/lib/ai/recommend";
 
 export async function GET(request: Request) {
@@ -22,9 +22,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const aiUnlocked = await hasAiAccess(session.user.id);
-  if (!aiUnlocked) {
-    return NextResponse.json({ error: "AI 周报需要 AI 智能版" }, { status: 403 });
+  const reportAccess = await hasReportAccess(session.user.id);
+  if (!reportAccess) {
+    return NextResponse.json({ error: "AI 学习报告需要官方关卡版或以上" }, { status: 403 });
   }
 
   const result = await buildRecommendation(child.id);

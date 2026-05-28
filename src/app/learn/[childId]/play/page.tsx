@@ -33,7 +33,7 @@ export default async function PlayPage({
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
         <h1 className="text-2xl font-black">AI 定制关需要 AI 智能版</h1>
-        <p className="mt-4 text-slate-600">¥49.9/年解锁 AI 定制关、家长周报与日后成长包免费获取，或在设置页兑换邀请码。</p>
+        <p className="mt-4 text-slate-600">¥49.9/年解锁 AI 定制关、家长周报与日后成长包。可在设置页兑换邀请码，或发邮件至 397543632@qq.com 付费开通。</p>
         <div className="mt-8 flex justify-center gap-3">
           <Link href={`/learn/${childId}`} className="text-indigo-600">
             返回模式选择

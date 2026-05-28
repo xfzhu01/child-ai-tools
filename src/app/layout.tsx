@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
+import { getTryPath } from "@/lib/auth/try-path";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Providers } from "@/components/providers";
@@ -28,15 +29,16 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
+  const tryHref = await getTryPath(session?.user?.id);
 
   return (
     <html lang="zh-CN">
-      <body className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-amber-50 text-slate-900 antialiased">
+        <body className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 text-slate-900 antialiased">
         <Providers session={session}>
           <div className="flex min-h-screen flex-col">
-            <SiteHeader session={session} />
+            <SiteHeader session={session} tryHref={tryHref} />
             <main className="flex-1">{children}</main>
-            <SiteFooter />
+            <SiteFooter tryHref={tryHref} />
           </div>
         </Providers>
       </body>

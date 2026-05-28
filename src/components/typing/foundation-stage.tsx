@@ -11,9 +11,6 @@ type Props = {
   totalRounds: number;
   combo: number;
   levelTitle: string;
-  shatteringIndices?: number[];
-  errorShake?: boolean;
-  celebrating?: boolean;
   passHint?: string;
 };
 
@@ -26,9 +23,6 @@ export function FoundationStage({
   totalRounds,
   combo,
   levelTitle,
-  shatteringIndices = [],
-  errorShake = false,
-  celebrating = false,
   passHint,
 }: Props) {
   const isLetterLevel = kindLabel === "letter" && letter;
@@ -44,11 +38,7 @@ export function FoundationStage({
       </div>
 
       {isLetterLevel ? (
-        <div
-          className={`relative mx-auto max-w-sm overflow-hidden rounded-3xl border-4 border-amber-300 bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 p-8 shadow-lg ${
-            errorShake ? "animate-shake" : ""
-          } ${celebrating ? "scale-[1.02] transition-transform" : ""}`}
-        >
+        <div className="relative mx-auto max-w-sm overflow-hidden rounded-3xl border-4 border-amber-300 bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 p-8 shadow-lg">
           <div
             className="pointer-events-none absolute inset-0 opacity-20"
             style={{
@@ -70,16 +60,11 @@ export function FoundationStage({
         <p className="rounded-xl bg-violet-50 px-4 py-2 text-center text-sm text-violet-800">{passHint}</p>
       ) : null}
 
-      <div
-        className={`rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 p-8 text-white shadow-xl ${
-          errorShake ? "animate-shake" : ""
-        }`}
-      >
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 p-8 text-white shadow-xl">
         <div className="min-h-16 whitespace-pre-wrap text-3xl font-bold tracking-wide md:text-4xl">
           {text.split("").map((char, index) => {
             const state =
               index < typedLength ? "typed" : index === typedLength ? "active" : "pending";
-            const shattered = shatteringIndices.includes(index);
             const colorClass =
               index < typedLength
                 ? "text-emerald-300"
@@ -94,7 +79,7 @@ export function FoundationStage({
                 key={`${char}-${index}`}
                 char={char}
                 state={state}
-                className={`${colorClass} ${shattered ? "animate-pulse opacity-30" : ""}`}
+                className={colorClass}
               />
             );
           })}

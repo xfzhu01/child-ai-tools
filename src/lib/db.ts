@@ -11,6 +11,14 @@ const globalForPrisma = globalThis as unknown as {
 /** Bump when Prisma schema changes (e.g. new GameMode enum values). */
 const PRISMA_CLIENT_VERSION = 4;
 
+/** Avoid pg v9 SSL mode deprecation warning while keeping Neon-compatible TLS. */
+function normalizePgConnectionString(url: string) {
+  if (!url.includes("sslmode=")) return url;
+  if (url.includes("uselibpqcompat=")) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}uselibpqcompat=true`;
+}
+
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
@@ -20,7 +28,7 @@ function createPrismaClient() {
   const pool =
     globalForPrisma.pool ??
     new Pool({
-      connectionString,
+      connectionString: normalizePgConnectionString(connectionString),
       max: process.env.DATABASE_POOL_MAX ? Number(process.env.DATABASE_POOL_MAX) : 10,
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 10_000,

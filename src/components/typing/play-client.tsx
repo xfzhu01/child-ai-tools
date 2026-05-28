@@ -21,8 +21,6 @@ const MODES_WITH_LEVELS: GameMode[] = [
   "FOUNDATION",
   "AI_CUSTOM",
 ];
-const AI_CONTENT_MODES: GameMode[] = ["ASSESSMENT", "ADVENTURE", "CHAIN", "AI_CUSTOM"];
-
 export function PlayClient({ childId, age, aiUnlocked }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,8 +35,8 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
   const [aiGameEmoji, setAiGameEmoji] = useState<string>();
   const [progress, setProgress] = useState<Partial<Record<GameMode, ModeProgressSnapshot>>>();
   const needsProgress = MODES_WITH_LEVELS.includes(mode);
-  /** 零基础指法使用固定字母课程，不走 AI 生成内容 */
-  const usesAiContent = aiUnlocked && AI_CONTENT_MODES.includes(mode);
+  /** 仅 AI 定制关使用 AI 生成内容；官卡与未解锁用户一样走固定关卡 */
+  const usesAiContent = mode === "AI_CUSTOM" && aiUnlocked;
   const [loading, setLoading] = useState(usesAiContent || needsProgress);
   const [loadError, setLoadError] = useState("");
   const [saveError, setSaveError] = useState("");
@@ -297,7 +295,7 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
     <>
       {usesAiContent && aiSource ? (
         <p className="mx-auto max-w-4xl px-4 pt-4 text-center text-xs text-violet-600">
-          {mode === "AI_CUSTOM" && aiGameTitle
+          {aiGameTitle
             ? `${aiGameEmoji ?? "🎮"} 本关：${aiGameTitle} · ${aiSource === "ai" ? "AI 根据弱项生成内容" : "规则引擎备用内容"}`
             : aiSource === "ai"
               ? "✨ 本关内容由 AI 根据小朋友练习数据智能生成"

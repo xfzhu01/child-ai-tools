@@ -35,7 +35,7 @@ export const PLANS = {
 export const AI_PLAN_FEATURES = [
   "包含官方关卡版全部权益",
   "AI 定制关 · 弱项键位专属练习",
-  "AI 家长周报",
+  "AI 学习报告 · 深度分析与建议",
   "全部主题皮肤",
   PLANS.ai.bundleBenefit,
 ] as const;

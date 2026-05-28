@@ -67,16 +67,29 @@ export default async function LearnPage({ params }: { params: Promise<{ childId:
     : `今日剩余 ${access.remaining}/${FREE_DAILY_SESSIONS} 关`;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
-      <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+    <div className="relative mx-auto max-w-5xl px-5 py-12">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        aria-hidden
+      >
+        <div className="absolute -top-20 right-0 h-64 w-72 rounded-full bg-amber-100/40 blur-3xl" />
+        <div className="absolute left-0 top-32 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
+      </div>
+
+      <Link href="/dashboard" className="inline-flex text-sm font-medium text-indigo-600 transition hover:text-indigo-800">
         ← 返回家长中心
       </Link>
-      <div className="mt-4">
+      <div className="mt-5">
         <h1 className="text-3xl font-black tracking-tight text-slate-900">{child.name}，选择今日冒险！</h1>
-        <p className="mt-2 text-slate-600">
-          {child.age} 岁 · {sessionLabel}
-        </p>
-        <p className="mt-1 text-sm text-emerald-700">练习进度已保存到云端，下次登录可继续</p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+            {child.age} 岁
+          </span>
+          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700">
+            {sessionLabel}
+          </span>
+        </div>
+        <p className="mt-3 text-sm text-emerald-600">练习进度已保存到云端，下次登录可继续</p>
       </div>
 
       {continueTarget ? (
@@ -91,7 +104,7 @@ export default async function LearnPage({ params }: { params: Promise<{ childId:
         </div>
       ) : null}
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      <div className="mt-10 grid gap-5 md:grid-cols-2">
         {modes.map((mode) => {
           const locked = mode.id === "AI_CUSTOM" && !aiUnlocked;
           const modeProgress = progressMap[mode.id as GameMode];

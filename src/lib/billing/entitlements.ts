@@ -1,5 +1,9 @@
 import prisma from "@/lib/db";
 import {
+  FREE_DAILY_SESSIONS,
+  isUnlimitedFreeMode,
+} from "@/lib/billing/free-tier-constants";
+import {
   PLANS,
   subscriptionLabel,
   tierGrantsAi,
@@ -10,15 +14,9 @@ import {
   type SubscriptionTier,
 } from "@/lib/billing/plans";
 
-const FREE_DAILY_SESSIONS = 3;
+export { FREE_DAILY_SESSIONS, UNLIMITED_FREE_MODES, isUnlimitedFreeMode } from "@/lib/billing/free-tier-constants";
+
 const FREE_DAILY_AI_CALLS = 0;
-
-/** Official modes that are always free with no daily session cap. */
-export const UNLIMITED_FREE_MODES = ["FOUNDATION"] as const;
-
-export function isUnlimitedFreeMode(mode: string): boolean {
-  return (UNLIMITED_FREE_MODES as readonly string[]).includes(mode);
-}
 
 function activeEntitlementWhere(userId: string) {
   return {
@@ -77,12 +75,20 @@ export async function hasAiAccess(userId: string) {
   return tier === TIER_AI;
 }
 
+export async function hasReportAccess(userId: string) {
+  const tier = await getSubscriptionTier(userId);
+  return tier !== "free";
+}
+
 export async function canAccessFeature(
   userId: string,
   feature: "ai_custom" | "unlimited" | "weekly_report",
 ) {
-  if (feature === "ai_custom" || feature === "weekly_report") {
+  if (feature === "ai_custom") {
     return hasAiAccess(userId);
+  }
+  if (feature === "weekly_report") {
+    return hasReportAccess(userId);
   }
   if (feature === "unlimited") {
     return hasBasicAccess(userId);
@@ -197,4 +203,4 @@ export async function redeemInviteCode(userId: string, code: string) {
   return tier;
 }
 
-export { FREE_DAILY_SESSIONS, subscriptionLabel };
+export { subscriptionLabel };

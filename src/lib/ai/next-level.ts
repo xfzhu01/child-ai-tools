@@ -315,43 +315,11 @@ export async function buildNextLevel(input: {
   const mode = input.mode;
   const level = input.level ?? 1;
 
-  if (mode === "AI_CUSTOM") {
-    return buildAiCustomLevel(ctx, level);
+  if (mode !== "AI_CUSTOM") {
+    throw new Error("AI content generation is only available for AI_CUSTOM mode");
   }
 
-  const count = modeItemCount(mode);
-
-  let items: AiLevelItem[] = [];
-  let parentSummary = buildRuleSummary(ctx, mode, level);
-  let source: "ai" | "rule" = "rule";
-
-  if (isLLMConfigured()) {
-    try {
-      const aiResult = await generateWithLLM(ctx, mode, level, count);
-      if (aiResult) {
-        items = aiResult.items;
-        parentSummary = aiResult.summary;
-        source = "ai";
-      }
-    } catch {
-      // fall through to rule engine
-    }
-  }
-
-  if (items.length === 0) {
-    items = ruleGeneratedItems(ctx, mode, level, count);
-    if (items.length === 0) {
-      items = staticFallbackItems(mode, level, count);
-    }
-  }
-
-  return {
-    focusKeys: ctx.focusKeys,
-    items,
-    difficulty: ctx.difficulty,
-    parentSummary,
-    source,
-  };
+  return buildAiCustomLevel(ctx, level);
 }
 
 export async function cacheNextLevel(

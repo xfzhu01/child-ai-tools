@@ -18,7 +18,7 @@ import {
   trendLabel,
   trendTone,
 } from "@/lib/typing-engine/child-report";
-import { hasAiAccess } from "@/lib/billing/entitlements";
+import { hasAiAccess, hasReportAccess } from "@/lib/billing/entitlements";
 import { getAllModeProgress } from "@/lib/typing-engine/mode-progress";
 import { format } from "date-fns";
 
@@ -38,6 +38,7 @@ export default async function ChildDashboardPage({ params }: { params: Promise<{
   if (!child) notFound();
 
   const aiUnlocked = await hasAiAccess(session.user.id);
+  const reportUnlocked = await hasReportAccess(session.user.id);
   const progressMap = await getAllModeProgress(child.id);
   const report = buildChildReportMetrics({
     age: child.age,
@@ -49,17 +50,24 @@ export default async function ChildDashboardPage({ params }: { params: Promise<{
   const lastSession = child.typingSessions.at(-1);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+    <div className="relative mx-auto max-w-5xl px-5 py-12">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        aria-hidden
+      >
+        <div className="absolute -top-24 left-1/4 h-72 w-96 rounded-full bg-indigo-100/40 blur-3xl" />
+      </div>
+
+      <Link href="/dashboard" className="inline-flex text-sm font-medium text-indigo-600 transition hover:text-indigo-800">
         ← 返回家长中心
       </Link>
 
-      <div className="mt-6 overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 text-white shadow-xl">
+      <div className="mt-6 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-7 text-white shadow-xl md:p-8">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex flex-wrap items-center gap-4">
             <ChildAvatar child={child} size="lg" />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200">
+              <p className="text-xs font-semibold uppercase tracking-widest text-indigo-300">
                 学习分析报告
               </p>
               <h1 className="mt-1 text-3xl font-black">{child.name}</h1>
@@ -68,14 +76,14 @@ export default async function ChildDashboardPage({ params }: { params: Promise<{
               </p>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm backdrop-blur-sm">
-            <p className="text-slate-300">最近练习</p>
+          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm backdrop-blur-sm">
+            <p className="text-slate-400">最近练习</p>
             <p className="mt-1 font-semibold text-white">
               {lastSession ? format(lastSession.createdAt, "yyyy-MM-dd HH:mm") : "尚未开始"}
             </p>
             <Link
               href={`/learn/${childId}`}
-              className="mt-3 inline-flex text-sm font-semibold text-amber-300 hover:text-amber-200"
+              className="mt-3 inline-flex text-sm font-semibold text-amber-300 transition hover:text-amber-200"
             >
               继续练习 →
             </Link>
@@ -168,20 +176,20 @@ export default async function ChildDashboardPage({ params }: { params: Promise<{
       <Card className="mt-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">AI 教练摘要 {aiUnlocked ? "" : "（AI 智能版）"}</h2>
-            <p className="mt-1 text-sm text-slate-500">结合近期弱项与练习表现生成的个性化建议。</p>
+            <h2 className="text-lg font-bold text-slate-900">AI 学习报告{reportUnlocked ? "" : "（付费版）"}</h2>
+            <p className="mt-1 text-sm text-slate-500">AI 分析练习数据，生成个性化学习建议与改进方向。</p>
           </div>
         </div>
-        {aiUnlocked && child.aiRecommendations[0] ? (
+        {reportUnlocked && child.aiRecommendations[0] ? (
           <div className="mt-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">Latest Insight</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">最新分析</p>
             <p className="mt-2 leading-7 text-slate-700">{child.aiRecommendations[0].summary}</p>
           </div>
         ) : (
           <p className="mt-4 text-sm text-slate-500">
-            {aiUnlocked
-              ? "完成 AI 定制关后将自动生成教练摘要。"
-              : "开通 AI 智能版（¥49.9/年）或在设置页兑换邀请码后可查看 AI 教练摘要。"}
+            {reportUnlocked
+              ? "完成几次练习后将自动生成 AI 学习报告。"
+              : "开通官方关卡版（¥19.9/年）或以上即可查看 AI 学习报告，设置页可兑换或联系邮箱付费开通。"}
           </p>
         )}
       </Card>

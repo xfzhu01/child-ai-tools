@@ -44,6 +44,15 @@ type BurstTiming = {
 };
 
 function getBurstTiming(mode: GameMode): BurstTiming {
+  if (mode === "FOUNDATION") {
+    return {
+      shatterMs: 0,
+      celebrateMs: 0,
+      flashCorrectMs: 70,
+      flashErrorMs: 120,
+      errorShakeMs: 120,
+    };
+  }
   if (mode === "AI_CUSTOM") {
     return {
       shatterMs: 260,
@@ -192,7 +201,7 @@ function matchForMode(mode: GameMode, input: string, expected: string) {
 }
 
 function usesBurstTyping(mode: GameMode) {
-  return mode === "ADVENTURE" || mode === "FOUNDATION" || mode === "AI_CUSTOM";
+  return mode === "ADVENTURE" || mode === "AI_CUSTOM";
 }
 
 export function TypingGame({
@@ -353,7 +362,11 @@ export function TypingGame({
       setLevelMeta(next.meta);
       setTyped("");
       setTargetKey(next.text[0]);
-      await saveCheckpointQuietly({ level, itemIndex: nextItemIndex });
+      if (mode === "FOUNDATION") {
+        void saveCheckpointQuietly({ level, itemIndex: nextItemIndex });
+      } else {
+        await saveCheckpointQuietly({ level, itemIndex: nextItemIndex });
+      }
     },
     [aiLevelItems, clearShatterTimers, level, mode, saveCheckpointQuietly, totalItems],
   );
@@ -677,9 +690,6 @@ export function TypingGame({
             totalRounds={totalItems}
             combo={combo}
             levelTitle={promptTitle}
-            shatteringIndices={shatteringIndices}
-            errorShake={errorShake}
-            celebrating={celebrating}
             passHint={
               passAccuracy
                 ? `毕业考试：共 ${totalItems} 个单词，准确率 ≥ ${passAccuracy}% 即可通关`

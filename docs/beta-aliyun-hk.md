@@ -139,6 +139,11 @@ DEPLOY_TARGET=all npm run deploy:github-secrets
 - 安全组是否放行 22/80
 - SSH 密钥是否为创建实例时绑定的密钥对
 
+### 部署时 ECS 磁盘读写飙升 / 系统卡住
+
+- 不要在 ECS 上手动跑完整 `Dockerfile` 构建（含 `npm run build`）
+- 请在本机执行 `npm run deploy:aliyun`：本地编译 → rsync 产物 → ECS 仅 `docker compose build`（秒级）
+
 ### 登录后跳回登录页
 
 - `ALIYUN_AUTH_URL` 必须与浏览器地址栏一致

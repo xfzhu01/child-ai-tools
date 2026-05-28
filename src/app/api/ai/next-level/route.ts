@@ -5,11 +5,9 @@ import { buildNextLevel, cacheNextLevel } from "@/lib/ai/next-level";
 import { canAccessFeature, canCallAi, incrementAiUsage } from "@/lib/billing/entitlements";
 import { checkRateLimit } from "@/lib/analytics";
 import { z } from "zod";
-import type { GameMode } from "@/lib/typing-engine/level-content";
-
 const schema = z.object({
   childId: z.string(),
-  mode: z.enum(["ASSESSMENT", "ADVENTURE", "CHAIN", "AI_CUSTOM"]),
+  mode: z.literal("AI_CUSTOM"),
   level: z.number().int().min(1).optional(),
   lastSessionId: z.string().optional(),
 });
@@ -44,7 +42,7 @@ export async function POST(request: Request) {
 
     const result = await buildNextLevel({
       childId: child.id,
-      mode: body.mode as GameMode,
+      mode: body.mode,
       level: body.level ?? 1,
       lastSessionId: body.lastSessionId,
     });

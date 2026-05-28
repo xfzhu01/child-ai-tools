@@ -6,6 +6,7 @@
   },
   "nav": {
     "home": "首页",
+    "try": "开始练习",
     "pricing": "定价",
     "dashboard": "家长中心",
     "login": "登录",
@@ -16,15 +17,26 @@
     "admin": "管理"
   },
   "landing": {
-    "heroTitle": "6–12 岁小朋友的 AI 高效打字学习",
-    "heroSubtitle": "AI 分析每一键，只练弱项、少重复、进步快。闯关游戏孩子爱练，家长周报一眼看懂。",
+    "heroBadge": "6–12 岁 · AI 打字学习",
+    "heroTitle": "练对、练快",
+    "heroTitleAccent": "不是盲练打字",
+    "heroSubtitle": "AI 分析每一键，只练弱项。闯关孩子爱练，家长周报一眼看懂。",
     "cta": "免费开始",
-    "feature1Title": "AI 高效练打字",
-    "feature1Desc": "按键级数据分析，弱项一键生成练习，告别盲目重复。",
-    "feature2Title": "专为 6–12 岁设计",
-    "feature2Desc": "从基础指法到词句挑战，按年龄梯度科学进阶。",
+    "tryCta": "立即体验",
+    "tryHint": "无需登录 · 零基础指法无限练",
+    "tryHintLoggedIn": "已登录 · 进入孩子练习进度",
+    "feature1Title": "AI 分析弱项",
+    "feature1Desc": "按键级数据，哪里慢、哪里错，一目了然。",
+    "feature2Title": "闯关式练习",
+    "feature2Desc": "摸底、冒险、接龙、指法，由易到难科学进阶。",
     "feature3Title": "家长看得懂",
-    "feature3Desc": "进步趋势、键位热力图、AI 周报，一眼知道该怎么练。"
+    "feature3Desc": "进步趋势与 AI 周报，不用猜孩子练得怎么样。",
+    "step1": "立即体验",
+    "step1Desc": "无需注册，先玩零基础指法",
+    "step2": "创建档案",
+    "step2Desc": "添加孩子，保存进度与报告",
+    "step3": "持续进步",
+    "step3Desc": "官卡闯关，AI 版解锁定制关"
   },
   "pricing": {
     "free": "免费版",
