@@ -18,7 +18,7 @@ import {
   trendLabel,
   trendTone,
 } from "@/lib/typing-engine/child-report";
-import { hasAiAccess, hasReportAccess } from "@/lib/billing/entitlements";
+import { hasReportAccess } from "@/lib/billing/entitlements";
 import { getAllModeProgress } from "@/lib/typing-engine/mode-progress";
 import { format } from "date-fns";
 
@@ -37,7 +37,6 @@ export default async function ChildDashboardPage({ params }: { params: Promise<{
   });
   if (!child) notFound();
 
-  const aiUnlocked = await hasAiAccess(session.user.id);
   const reportUnlocked = await hasReportAccess(session.user.id);
   const progressMap = await getAllModeProgress(child.id);
   const report = buildChildReportMetrics({

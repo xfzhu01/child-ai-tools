@@ -536,7 +536,6 @@ export function TypingGame({
     });
     setSubmitting(false);
   }, [
-    combo,
     events,
     examFailed,
     itemIndex,

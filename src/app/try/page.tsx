@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ModeSelectCard } from "@/components/learn/mode-select-card";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { FREE_DAILY_SESSIONS } from "@/lib/billing/free-tier-constants";

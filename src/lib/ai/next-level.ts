@@ -11,19 +11,11 @@ import {
 } from "@/lib/ai/mini-games";
 import {
   adjustDifficulty,
-  buildRuleExercises,
   detectAdjacentErrors,
-  getAgeBand,
   rankWeakKeys,
   type KeystrokeEvent,
 } from "@/lib/typing-engine/analyzer";
-import {
-  getItemsPerLevel,
-  getLevelContent,
-  getLevelTitle,
-  type GameMode,
-} from "@/lib/typing-engine/level-content";
-import { normalizeTypingText } from "@/lib/typing-engine/typing-chars";
+import { type GameMode } from "@/lib/typing-engine/level-content";
 
 export type AiLevelItem = {
   text: string;
@@ -57,12 +49,6 @@ type ChildContext = {
   avgWpm: number;
   sessionsCount: number;
 };
-
-const BLOCKED = ["暴力", "恐怖", "赌博", "色情"];
-
-function isChildSafe(text: string) {
-  return text.length > 0 && !BLOCKED.some((word) => text.includes(word));
-}
 
 async function loadChildContext(childId: string, lastSessionId?: string): Promise<ChildContext | null> {
   const child = await prisma.childProfile.findUnique({
@@ -102,125 +88,6 @@ async function loadChildContext(childId: string, lastSessionId?: string): Promis
   };
 }
 
-function buildRuleSummary(ctx: ChildContext, mode: GameMode, level: number) {
-  const keysText = ctx.focusKeys.length > 0 ? ctx.focusKeys.join("、") : "基础键位";
-  const adjacentText = ctx.adjacent.length > 0 ? `，相邻键误触：${ctx.adjacent.join(" ")}` : "";
-  const modeLabel =
-    mode === "AI_CUSTOM"
-      ? "AI 定制关"
-      : mode === "ADVENTURE"
-        ? `字母大冒险第 ${level} 关`
-        : mode === "CHAIN"
-          ? `词语接龙第 ${level} 关`
-          : `测评第 ${level} 关`;
-  return `${ctx.name} 的${modeLabel}已根据近期数据调整。平均准确率 ${Math.round(ctx.avgAccuracy)}%，建议重点练习：${keysText}${adjacentText}。`;
-}
-
-function staticFallbackItems(mode: GameMode, level: number, count: number): AiLevelItem[] {
-  const items: AiLevelItem[] = [];
-  for (let i = 0; i < count; i++) {
-    const content = getLevelContent(mode, level, i);
-    if (!content) break;
-    if (content.kind === "idiom") {
-      items.push({
-        text: content.text,
-        hanzi: content.hanzi,
-        chainHint: content.chainHint,
-      });
-    } else if (content.kind === "text") {
-      items.push({ text: content.text, title: content.title });
-    } else {
-      items.push({ text: content.text });
-    }
-  }
-  return items;
-}
-
-function ruleGeneratedItems(ctx: ChildContext, mode: GameMode, level: number, count: number): AiLevelItem[] {
-  if (mode === "ADVENTURE") {
-    return buildRuleExercises(ctx.focusKeys, ctx.difficulty, ctx.age)
-      .slice(0, count)
-      .map((item) => ({ text: item.text, focusKey: item.focusKey }));
-  }
-
-  if (mode === "ASSESSMENT") {
-    const exercises = buildRuleExercises(ctx.focusKeys, ctx.difficulty, ctx.age);
-    const combined = exercises
-      .slice(0, Math.min(3, count))
-      .map((e) => e.text)
-      .join(" ");
-    return [{ text: combined, title: getLevelTitle(mode, level) }];
-  }
-
-  return staticFallbackItems(mode, level, count);
-}
-
-function modeItemCount(mode: GameMode) {
-  return getItemsPerLevel(mode);
-}
-
-function buildSystemPrompt(mode: GameMode) {
-  const base =
-    "你是儿童打字教练，为 6-12 岁小朋友生成下一关练习。输出必须是 JSON，不要 markdown。内容儿童友好，禁止不当词汇。";
-
-  if (mode === "CHAIN") {
-    return `${base} 输出格式：{"items":[{"text":"拼音无音调小写空格分词","hanzi":"四字成语","chainHint":"简短接龙提示"}...],"summary":"给家长的中文摘要"}`;
-  }
-  if (mode === "ASSESSMENT") {
-    return `${base} 输出格式：{"items":[{"text":"一段覆盖弱项键位的英文练习句","title":"关卡标题"}],"summary":"给家长的中文摘要"}`;
-  }
-  return `${base} 输出格式：{"items":[{"text":"英文单词"}...],"summary":"给家长的中文摘要"}`;
-}
-
-function buildUserPrompt(ctx: ChildContext, mode: GameMode, level: number, count: number) {
-  return [
-    `孩子：${ctx.name}，${ctx.age} 岁（${getAgeBand(ctx.age)} 档）`,
-    `模式：${mode}，关卡：${level}，需要 ${count} 个练习项`,
-    `弱项键位：${ctx.focusKeys.join(",") || "a,s,d,f"}`,
-    `相邻误触：${ctx.adjacent.join(",") || "无"}`,
-    `近期 ${ctx.sessionsCount} 次练习，平均准确率 ${Math.round(ctx.avgAccuracy)}%，速度 ${Math.round(ctx.avgWpm)} WPM`,
-    `难度系数：${ctx.difficulty}/5`,
-    "请根据以上个人情况智能生成下一关内容，优先覆盖弱项键位，难度匹配年龄。",
-  ].join("\n");
-}
-
-function normalizeLLMItems(
-  raw: { text: string; focusKey?: string; title?: string; hanzi?: string; chainHint?: string }[],
-  mode: GameMode,
-  level: number,
-): AiLevelItem[] {
-  return raw
-    .filter((item) => isChildSafe(item.text))
-    .map((item) => ({
-      text: normalizeTypingText(item.text.trim()),
-      focusKey: item.focusKey,
-      title: item.title ?? (mode === "ASSESSMENT" ? getLevelTitle(mode, level) : undefined),
-      hanzi: item.hanzi,
-      chainHint: item.chainHint,
-    }));
-}
-
-async function generateWithLLM(
-  ctx: ChildContext,
-  mode: GameMode,
-  level: number,
-  count: number,
-): Promise<{ items: AiLevelItem[]; summary: string } | null> {
-  const parsed = await chatCompletionJson<{
-    items?: { text: string; focusKey?: string; title?: string; hanzi?: string; chainHint?: string }[];
-    summary?: string;
-  }>([
-    { role: "system", content: buildSystemPrompt(mode) },
-    { role: "user", content: buildUserPrompt(ctx, mode, level, count) },
-  ]);
-
-  if (!parsed?.items?.length || !parsed.summary) return null;
-
-  const items = normalizeLLMItems(parsed.items, mode, level).slice(0, count);
-  if (items.length === 0) return null;
-
-  return { items, summary: parsed.summary };
-}
 
 async function generateMiniGameWithLLM(
   ctx: ChildContext,
