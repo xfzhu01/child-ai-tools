@@ -82,7 +82,7 @@ jobs:
           check AUTH_SECRET
           check AUTH_URL
           check LLM_API_KEY
-          (( missing )) && exit 1
+          if (( missing )); then exit 1; fi
       - name: Sync Vercel env
         run: bash scripts/sync-vercel-env-ci.sh
       - name: Deploy
@@ -122,6 +122,6 @@ jobs:
           check AUTH_SECRET
           check LLM_API_KEY
           check ALIYUN_AUTH_URL
-          (( missing )) && exit 1
+          if (( missing )); then exit 1; fi
       - name: Deploy to ECS
         run: bash scripts/deploy-aliyun-ci.sh
