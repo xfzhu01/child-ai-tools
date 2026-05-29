@@ -64,10 +64,15 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
               ? modeProgress?.currentLevel ?? 1
               : modeProgress?.currentLevel ?? 1;
 
+          const prevGameType =
+            typeof window !== "undefined"
+              ? window.sessionStorage.getItem(`ai-last-game-${childId}`) ?? undefined
+              : undefined;
+
           const aiRes = await fetch("/api/ai/next-level", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ childId, mode, level }),
+            body: JSON.stringify({ childId, mode, level, prevGameType }),
           });
           const aiData = await aiRes.json();
           if (cancelled) return;
@@ -84,6 +89,9 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
               setAiGameType(aiData.gameType as AiMiniGameType);
               setAiGameTitle(aiData.gameTitle);
               setAiGameEmoji(aiData.gameEmoji);
+              if (typeof window !== "undefined") {
+                window.sessionStorage.setItem(`ai-last-game-${childId}`, aiData.gameType);
+              }
             }
           } else {
             setLoadError("关卡内容为空，请重试");

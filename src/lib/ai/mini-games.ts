@@ -90,50 +90,17 @@ export const MINI_GAME_META: Record<AiMiniGameType, AiMiniGameMeta> = {
   },
 };
 
-export function pickRandomMiniGameType(): AiMiniGameType {
-  return MINI_GAME_TYPES[Math.floor(Math.random() * MINI_GAME_TYPES.length)]!;
-}
-
-function hashString(input: string): number {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
-  }
-  return hash;
-}
-
-function createSeededRng(seed: number) {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/** Deterministic shuffle: every block of 8 levels contains each mini-game exactly once. */
-export function shuffledMiniGameDeck(childId: string, block: number): AiMiniGameType[] {
-  const deck: AiMiniGameType[] = [...MINI_GAME_TYPES];
-  const rng = createSeededRng(hashString(`${childId}:block:${block}`));
-
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    const tmp = deck[i]!;
-    deck[i] = deck[j]!;
-    deck[j] = tmp;
-  }
-
-  return deck;
-}
-
-/** Stable per child+level; cycles all 8 games evenly in randomized blocks of 8. */
-export function pickMiniGameTypeForLevel(childId: string, level: number): AiMiniGameType {
-  const safeLevel = Math.max(1, level);
-  const block = Math.floor((safeLevel - 1) / MINI_GAME_TYPES.length);
-  const posInBlock = (safeLevel - 1) % MINI_GAME_TYPES.length;
-  return shuffledMiniGameDeck(childId, block)[posInBlock]!;
+/**
+ * 等概率随机挑选一个小游戏。
+ * 传入 `exclude` 时会从其余游戏中等概率挑选，避免与上一关重复，
+ * 这样每个游戏长期出现概率仍然均等，但不会连续两关玩同一个。
+ */
+export function pickRandomMiniGameType(exclude?: AiMiniGameType): AiMiniGameType {
+  const pool = exclude
+    ? MINI_GAME_TYPES.filter((type) => type !== exclude)
+    : MINI_GAME_TYPES;
+  const candidates = pool.length > 0 ? pool : MINI_GAME_TYPES;
+  return candidates[Math.floor(Math.random() * candidates.length)]!;
 }
 
 export function getMiniGameMeta(type: AiMiniGameType): AiMiniGameMeta {

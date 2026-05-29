@@ -77,41 +77,60 @@ const GAME_THEMES: Record<
   },
 };
 
+const SPARK_COLORS = [
+  "text-yellow-200",
+  "text-pink-200",
+  "text-sky-200",
+  "text-lime-200",
+  "text-orange-200",
+  "text-fuchsia-200",
+];
+const POP_EMOJIS = ["⭐", "✨", "💫", "🌟", "🎉"];
+
+/** 纯函数伪随机：用 Math.sin 哈希出 [0,1)，渲染期间调用安全且结果稳定。 */
+function pseudoRandom(seed: number): number {
+  const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 function AiCustomShatter({ char }: { char: string }) {
   const sparks = useMemo(
     () =>
-      Array.from({ length: 6 }, (_, i) => {
-        const angle = (i / 6) * Math.PI * 2;
-        const distance = 28 + (i % 2) * 10;
+      Array.from({ length: 8 }, (_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const distance = 26 + (i % 3) * 12;
         return {
           id: i,
           tx: Math.cos(angle) * distance,
           ty: Math.sin(angle) * distance,
-          rot: i * 55 + (i % 2 === 0 ? 12 : -12),
+          rot: i * 47 + (i % 2 === 0 ? 16 : -16),
+          color: SPARK_COLORS[i % SPARK_COLORS.length],
         };
       }),
     [],
   );
+  const popEmoji =
+    POP_EMOJIS[(char.codePointAt(0) ?? 0) % POP_EMOJIS.length] ?? POP_EMOJIS[0];
 
   return (
     <span className="ai-custom-shatter relative inline-flex h-[1.15em] min-w-[0.75em] items-center justify-center">
       {sparks.map((spark) => (
         <span
           key={spark.id}
-          className="ai-custom-spark absolute left-1/2 top-1/2 font-black text-yellow-100"
+          className={cn("ai-custom-spark absolute left-1/2 top-1/2 font-black", spark.color)}
           style={
             {
               "--tx": `${spark.tx}px`,
               "--ty": `${spark.ty}px`,
               "--rot": `${spark.rot}deg`,
-              animationDelay: `${spark.id * 12}ms`,
+              animationDelay: `${spark.id * 10}ms`,
             } as CSSProperties
           }
         >
           {char}
         </span>
       ))}
-      <span className="ai-custom-spark-flash absolute text-lg leading-none">✨</span>
+      <span className="ai-custom-spark-flash absolute text-lg leading-none">{popEmoji}</span>
     </span>
   );
 }
@@ -166,8 +185,9 @@ function AiCustomChar({ char, revealChar, index, typedLength, shatteringIndices,
     <span
       className={cn(
         "inline-block origin-center transition-[transform,color,opacity,filter] duration-150 ease-out will-change-transform",
-        isDone && "scale-95 text-emerald-200",
-        isActive && "scale-110 text-yellow-100 drop-shadow-[0_0_12px_rgb(250_204_21/0.55)]",
+        isDone && "ai-custom-char-done scale-95 text-emerald-200",
+        isActive &&
+          "ai-custom-char-bounce scale-110 text-yellow-100 drop-shadow-[0_0_14px_rgb(250_204_21/0.6)]",
         isActive && errorShake && "ai-custom-char-shake text-rose-200",
         !isDone && !isActive && "text-white/80",
       )}
@@ -230,14 +250,96 @@ function GameDecoration({ gameType }: { gameType: AiMiniGameType }) {
   }
 }
 
+const CELEBRATE_MESSAGES = [
+  { emoji: "🎉", text: "漂亮！" },
+  { emoji: "🌟", text: "太棒啦！" },
+  { emoji: "💪", text: "好厉害！" },
+  { emoji: "🚀", text: "冲呀！" },
+  { emoji: "👏", text: "完美！" },
+  { emoji: "🦄", text: "超神啦！" },
+];
+const CONFETTI_COLORS = [
+  "#fde047",
+  "#f472b6",
+  "#38bdf8",
+  "#a3e635",
+  "#fb923c",
+  "#c084fc",
+  "#34d399",
+];
+
+function CelebrationBurst({ combo }: { combo: number }) {
+  // 连击越高，鼓励语越夸张；用 combo 作为种子带来变化感。
+  const message = useMemo(() => {
+    if (combo >= 12) return CELEBRATE_MESSAGES[5]!;
+    if (combo >= 6) return CELEBRATE_MESSAGES[2 + Math.floor(pseudoRandom(combo) * 3)]!;
+    return CELEBRATE_MESSAGES[Math.floor(pseudoRandom(combo + 1) * 3)]!;
+  }, [combo]);
+
+  const confetti = useMemo(
+    () =>
+      Array.from({ length: 14 }, (_, i) => {
+        const base = i + combo * 7;
+        return {
+          id: i,
+          left: pseudoRandom(base) * 100,
+          tx: (pseudoRandom(base + 1) - 0.5) * 120,
+          delay: pseudoRandom(base + 2) * 120,
+          duration: 600 + pseudoRandom(base + 3) * 400,
+          rot: pseudoRandom(base + 4) * 360,
+          color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+          round: i % 2 === 0,
+        };
+      }),
+    [combo],
+  );
+
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden rounded-2xl bg-black/20 backdrop-blur-[2px]">
+      {confetti.map((piece) => (
+        <span
+          key={piece.id}
+          className="ai-custom-confetti absolute top-0 block h-2.5 w-2.5"
+          style={
+            {
+              left: `${piece.left}%`,
+              backgroundColor: piece.color,
+              borderRadius: piece.round ? "9999px" : "2px",
+              "--tx": `${piece.tx}px`,
+              "--rot": `${piece.rot}deg`,
+              animationDelay: `${piece.delay}ms`,
+              animationDuration: `${piece.duration}ms`,
+            } as CSSProperties
+          }
+        />
+      ))}
+      <div className="ai-custom-celebrate-pop flex items-center gap-2 rounded-full bg-white/25 px-5 py-2 shadow-lg ring-2 ring-white/40">
+        <span className="ai-custom-celebrate-emoji text-2xl">{message.emoji}</span>
+        <span className="text-base font-black drop-shadow">{message.text}</span>
+      </div>
+    </div>
+  );
+}
+
 function ComboDisplay({ combo, theme }: { combo: number; theme: string }) {
   const label =
-    combo >= 10 ? "🔥🔥 超级连击" : combo >= 5 ? "🔥 连击" : combo >= 3 ? "✨ 连击" : "连击";
+    combo >= 15
+      ? "🌈🔥 无敌连击"
+      : combo >= 10
+        ? "🔥🔥 超级连击"
+        : combo >= 5
+          ? "🔥 连击"
+          : combo >= 3
+            ? "✨ 连击"
+            : "连击";
   return (
     <span
+      // key 让每次连击数变化都重新播放一次弹跳动画
+      key={combo}
       className={cn(
         "rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums transition-all",
-        theme,
+        combo > 0 && "ai-custom-combo",
+        combo >= 10 ? "ai-custom-combo-rainbow text-white" : theme,
         combo >= 5 && "scale-110",
       )}
     >
@@ -285,7 +387,7 @@ export function AiCustomStage({
         {/* Header */}
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{emoji}</span>
+            <span className="ai-custom-mascot text-lg">{emoji}</span>
             <span className="text-sm font-bold">{title}</span>
             <span className={cn("text-xs", theme.accent)}>
               · 第 {itemRound}/{totalRounds} 轮
@@ -327,14 +429,7 @@ export function AiCustomStage({
             ))}
           </div>
 
-          {celebrating ? (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-black/20 backdrop-blur-[2px]">
-              <div className="flex items-center gap-2 rounded-full bg-white/20 px-5 py-2 shadow-lg">
-                <span className="text-xl">✨</span>
-                <span className="text-base font-black">漂亮！</span>
-              </div>
-            </div>
-          ) : null}
+          {celebrating ? <CelebrationBurst combo={combo} /> : null}
         </div>
       </div>
     </div>

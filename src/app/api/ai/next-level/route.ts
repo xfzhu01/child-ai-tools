@@ -4,12 +4,14 @@ import prisma from "@/lib/db";
 import { buildNextLevel, cacheNextLevel } from "@/lib/ai/next-level";
 import { canAccessFeature, canCallAi, incrementAiUsage } from "@/lib/billing/entitlements";
 import { checkRateLimit } from "@/lib/analytics";
+import { MINI_GAME_TYPES } from "@/lib/ai/mini-games";
 import { z } from "zod";
 const schema = z.object({
   childId: z.string(),
   mode: z.literal("AI_CUSTOM"),
   level: z.number().int().min(1).optional(),
   lastSessionId: z.string().optional(),
+  prevGameType: z.enum(MINI_GAME_TYPES).optional(),
 });
 
 export async function POST(request: Request) {
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
       mode: body.mode,
       level: body.level ?? 1,
       lastSessionId: body.lastSessionId,
+      prevGameType: body.prevGameType,
     });
 
     await cacheNextLevel(child.id, body.lastSessionId, result);

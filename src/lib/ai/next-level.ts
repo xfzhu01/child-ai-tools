@@ -6,7 +6,7 @@ import {
   buildRuleMiniGameItems,
   getMiniGameMeta,
   normalizeMiniGameItems,
-  pickMiniGameTypeForLevel,
+  pickRandomMiniGameType,
   type AiMiniGameType,
 } from "@/lib/ai/mini-games";
 import {
@@ -123,8 +123,13 @@ async function generateMiniGameWithLLM(
   return { items, summary: parsed.summary };
 }
 
-async function buildAiCustomLevel(ctx: ChildContext, level: number): Promise<NextLevelResult> {
-  const gameType = pickMiniGameTypeForLevel(ctx.id, level);
+async function buildAiCustomLevel(
+  ctx: ChildContext,
+  level: number,
+  prevGameType?: AiMiniGameType,
+): Promise<NextLevelResult> {
+  // 每关等概率随机挑选小游戏，并避免与上一关重复，保证趣味性和均衡度。
+  const gameType = pickRandomMiniGameType(prevGameType);
   const meta = getMiniGameMeta(gameType);
   let items: AiLevelItem[] = [];
   let parentSummary = `${ctx.name} 的第 ${level} 关：${meta.title}，重点练习 ${ctx.focusKeys.join("、") || "基础键位"}`;
@@ -175,6 +180,7 @@ export async function buildNextLevel(input: {
   mode: GameMode;
   level?: number;
   lastSessionId?: string;
+  prevGameType?: AiMiniGameType;
 }): Promise<NextLevelResult> {
   const ctx = await loadChildContext(input.childId, input.lastSessionId);
   if (!ctx) throw new Error("Child not found");
@@ -186,7 +192,7 @@ export async function buildNextLevel(input: {
     throw new Error("AI content generation is only available for AI_CUSTOM mode");
   }
 
-  return buildAiCustomLevel(ctx, level);
+  return buildAiCustomLevel(ctx, level, input.prevGameType);
 }
 
 export async function cacheNextLevel(
