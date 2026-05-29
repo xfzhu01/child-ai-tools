@@ -40,13 +40,13 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-3xl font-black">管理后台</h1>
+      <h1 className="font-display text-3xl font-extrabold">管理后台</h1>
       <Card className="mt-8">
         <h2 className="font-bold">手动开通订阅</h2>
         <div className="mt-4 flex flex-wrap gap-2">
           <Input placeholder="用户 ID" value={grantUserId} onChange={(e) => setGrantUserId(e.target.value)} />
           <select
-            className="rounded-lg border border-slate-200 px-3 text-sm"
+            className="rounded-xl border-2 border-grape-100 px-3 text-sm"
             value={grantTier}
             onChange={(e) => setGrantTier(e.target.value as Tier)}
           >
@@ -57,7 +57,7 @@ export default function AdminPage() {
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <select
-            className="rounded-lg border border-slate-200 px-3 text-sm"
+            className="rounded-xl border-2 border-grape-100 px-3 text-sm"
             value={inviteTier}
             onChange={(e) => setInviteTier(e.target.value as Tier)}
           >

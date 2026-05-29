@@ -287,10 +287,10 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
   if (loadError) {
     return (
       <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <p className="text-lg font-medium text-rose-600">{loadError}</p>
+        <p className="text-lg font-bold text-coral-600">{loadError}</p>
         <button
           type="button"
-          className="mt-4 text-indigo-600"
+          className="mt-4 font-bold text-grape-600 hover:text-grape-800"
           onClick={() => router.push(`/learn/${childId}`)}
         >
           返回模式选择
@@ -302,7 +302,7 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
   return (
     <>
       {usesAiContent && aiSource ? (
-        <p className="mx-auto max-w-4xl px-4 pt-4 text-center text-xs text-violet-600">
+        <p className="mx-auto mt-4 w-fit max-w-4xl rounded-full border-2 border-white bg-white/70 px-4 py-1.5 text-center text-xs font-bold text-grape-700 shadow-sm ring-1 ring-grape-100 backdrop-blur-sm">
           {aiGameTitle
             ? `${aiGameEmoji ?? "🎮"} 本关：${aiGameTitle} · ${aiSource === "ai" ? "AI 根据弱项生成内容" : "规则引擎备用内容"}`
             : aiSource === "ai"
@@ -311,7 +311,7 @@ export function PlayClient({ childId, age, aiUnlocked }: Props) {
         </p>
       ) : null}
       {saveError ? (
-        <p className="mx-auto max-w-4xl px-4 pt-4 text-center text-sm text-rose-600">{saveError}</p>
+        <p className="mx-auto max-w-4xl px-4 pt-4 text-center text-sm font-medium text-coral-600">{saveError}</p>
       ) : null}
       <TypingGame
         key={`${mode}-${level}-${startItemIndex}-${aiGameType ?? "static"}-${aiLevelItems?.map((e) => e.text).join("|") ?? "static"}`}

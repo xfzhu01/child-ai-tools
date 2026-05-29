@@ -32,13 +32,14 @@ export default async function PlayPage({
   if (mode === "AI_CUSTOM" && !(await hasAiAccess(session.user.id))) {
     return (
       <div className="mx-auto max-w-lg px-4 py-24 text-center">
-        <h1 className="text-2xl font-black">AI 定制关需要 AI 智能版</h1>
+        <div className="mb-3 text-4xl"><span className="candy-wiggle inline-block">🤖</span></div>
+        <h1 className="font-display text-2xl font-extrabold">AI 定制关需要 AI 智能版</h1>
         <p className="mt-4 text-slate-600">¥49.9/年解锁 AI 定制关、家长周报与日后成长包。可在设置页兑换邀请码，或发邮件至 397543632@qq.com 付费开通。</p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Link href={`/learn/${childId}`} className="text-indigo-600">
+        <div className="mt-8 flex justify-center gap-4">
+          <Link href={`/learn/${childId}`} className="font-bold text-grape-600 hover:text-grape-800">
             返回模式选择
           </Link>
-          <Link href="/pricing" className="text-indigo-600">
+          <Link href="/pricing" className="font-bold text-grape-600 hover:text-grape-800">
             查看定价
           </Link>
         </div>
@@ -69,7 +70,7 @@ export default async function PlayPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-100 to-amber-50 pb-0">
+    <div className="min-h-screen bg-gradient-to-b from-grape-100 via-bubble-50 to-sun-50 pb-0">
       <PlayClient childId={child.id} age={child.age} aiUnlocked={await hasAiAccess(session.user.id)} />
     </div>
   );

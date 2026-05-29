@@ -16,27 +16,29 @@ export default function LoginPage() {
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
         aria-hidden
       >
-        <div className="absolute -top-24 left-1/2 h-80 w-96 -translate-x-1/2 rounded-full bg-indigo-100/60 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 h-80 w-96 -translate-x-1/2 rounded-full bg-grape-200/50 blur-3xl" />
+        <div className="candy-float absolute right-0 top-40 h-40 w-40 rounded-full bg-bubble-200/40 blur-3xl" />
       </div>
 
       <div className="w-full">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black text-slate-900">欢迎回来</h1>
+          <div className="mb-3 text-4xl"><span className="candy-wiggle inline-block">👋</span></div>
+          <h1 className="font-display text-3xl font-extrabold text-slate-900">欢迎回来</h1>
           <p className="mt-2 text-sm text-slate-500">登录家长账号管理孩子学习</p>
         </div>
 
-        <Card className="border-slate-200/60 bg-white/90 p-8">
+        <Card className="p-8">
           <form action={formAction} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">邮箱</label>
+              <label className="mb-1.5 block text-sm font-bold text-slate-700">邮箱</label>
               <Input type="email" name="email" placeholder="your@email.com" required />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">密码</label>
+              <label className="mb-1.5 block text-sm font-bold text-slate-700">密码</label>
               <Input type="password" name="password" placeholder="输入密码" required />
             </div>
             {state?.error && (
-              <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">{state.error}</p>
+              <p className="rounded-xl bg-coral-50 px-3 py-2 text-sm font-medium text-coral-600">{state.error}</p>
             )}
             <Button type="submit" className="w-full" size="lg" disabled={pending}>
               {pending ? "登录中..." : "登录"}
@@ -46,7 +48,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           还没有账号？
-          <Link href="/register" className="ml-1 font-semibold text-indigo-600 hover:text-indigo-700">
+          <Link href="/register" className="ml-1 font-bold text-grape-600 hover:text-grape-700">
             注册
           </Link>
         </p>

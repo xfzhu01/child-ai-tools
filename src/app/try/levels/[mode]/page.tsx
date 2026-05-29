@@ -56,7 +56,7 @@ export default function GuestLevelsPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-20 text-center">
         <p className="text-lg text-slate-700">模式不存在</p>
-        <Link href="/try" className="mt-4 inline-block text-indigo-600">
+        <Link href="/try" className="mt-4 inline-block font-bold text-grape-600">
           返回体验中心
         </Link>
       </div>
@@ -73,36 +73,36 @@ export default function GuestLevelsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 md:py-12">
-      <Link href="/try" className="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+      <Link href="/try" className="text-sm font-bold text-grape-600 hover:text-grape-800">
         ← 返回体验中心
       </Link>
 
       <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">
-            {meta.emoji} {meta.title}
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">
+            <span className="candy-wiggle mr-1 inline-block">{meta.emoji}</span> {meta.title}
           </h1>
           <p className="mt-2 text-slate-600">{meta.desc}</p>
-          <p className="mt-1 text-sm font-medium text-indigo-700">{sessionLabel}</p>
+          <p className="mt-1 text-sm font-bold text-grape-700">{sessionLabel}</p>
         </div>
         {hasModeProgress(progress) ? (
-          <span className="inline-flex rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
+          <span className="inline-flex rounded-full bg-grape-100 px-3 py-1 text-sm font-bold text-grape-700 ring-1 ring-inset ring-grape-200">
             {formatModeProgress(mode, progress)}
           </span>
         ) : null}
       </div>
 
       {done ? (
-        <Card className="mt-6 border-emerald-200 bg-emerald-50/80">
-          <p className="font-semibold text-emerald-800">🎉 恭喜完成本模式体验！注册后可保存进度并解锁 AI 定制关。</p>
+        <Card className="mt-6 border-mint-200 bg-mint-50">
+          <p className="font-bold text-mint-700">🎉 恭喜完成本模式体验！注册后可保存进度并解锁 AI 定制关。</p>
         </Card>
       ) : null}
 
       {!canStart ? (
-        <Card className="mt-6 border-amber-200 bg-amber-50">
-          <p className="text-amber-900">
+        <Card className="mt-6 border-coral-200 bg-coral-50">
+          <p className="text-coral-700">
             今日免费体验次数已用完。明天再来，或{" "}
-            <Link href="/register" className="font-semibold text-indigo-700 underline">
+            <Link href="/register" className="font-bold text-grape-700 underline">
               注册账号
             </Link>{" "}
             解锁更多练习。
@@ -136,10 +136,10 @@ export default function GuestLevelsPage() {
           }
 
           return (
-            <Card key={level} className={`p-4 ${unlocked ? "" : "opacity-50"} ${isCurrent ? "border-indigo-300 bg-indigo-50" : ""}`}>
-              <p className="text-xs font-medium text-slate-500">关卡 {level}</p>
+            <Card key={level} className={`candy-card p-4 ${unlocked ? "" : "opacity-50"} ${isCurrent ? "border-grape-300 ring-2 ring-grape-200" : ""}`}>
+              <p className="text-xs font-bold text-grape-500">关卡 {level}</p>
               <p className="mt-1 text-sm font-bold leading-snug">{getLevelTitle(mode, level)}</p>
-              <p className="mt-2 text-sm text-amber-600">{stars > 0 ? "⭐".repeat(stars) : "未挑战"}</p>
+              <p className="mt-2 text-sm text-sun-600">{stars > 0 ? "⭐".repeat(stars) : "未挑战"}</p>
               {unlocked && canStart ? (
                 <Link href={href} className="mt-3 block">
                   <Button variant="child" className="w-full text-sm">
@@ -147,7 +147,7 @@ export default function GuestLevelsPage() {
                   </Button>
                 </Link>
               ) : unlocked && !canStart ? (
-                <p className="mt-3 text-center text-xs text-amber-700">今日次数已用完</p>
+                <p className="mt-3 text-center text-xs text-coral-600">今日次数已用完</p>
               ) : (
                 <p className="mt-3 text-center text-xs text-slate-400">未解锁</p>
               )}

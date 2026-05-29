@@ -30,7 +30,7 @@ export function RedeemInviteForm() {
     <form onSubmit={submit} className="mt-4 flex flex-wrap gap-2">
       <Input placeholder="输入邀请码" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
       <Button type="submit">兑换</Button>
-      {message && <p className="w-full text-sm text-slate-600">{message}</p>}
+      {message && <p className="w-full text-sm font-medium text-grape-700">{message}</p>}
     </form>
   );
 }

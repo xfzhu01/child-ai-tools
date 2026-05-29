@@ -44,30 +44,32 @@ export default async function DashboardPage() {
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
         aria-hidden
       >
-        <div className="absolute -top-32 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-gradient-to-b from-indigo-100/50 via-violet-50/30 to-transparent blur-3xl" />
+        <div className="absolute -top-32 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-gradient-to-b from-grape-200/50 via-bubble-100/30 to-transparent blur-3xl" />
+        <div className="candy-float absolute -right-10 top-44 h-44 w-44 rounded-full bg-sun-200/40 blur-3xl" />
       </div>
 
-      <section className="overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 p-7 text-white shadow-xl shadow-indigo-200/40 md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-grape-500 via-grape-600 to-bubble-500 p-7 text-white shadow-candy md:p-8">
+        <div className="candy-float pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-200">Family Hub</p>
-            <h1 className="mt-2 text-3xl font-black md:text-4xl">{t("dashboard.title")}</h1>
-            <p className="mt-3 max-w-xl text-sm text-indigo-100">
+            <p className="font-display text-xs font-bold uppercase tracking-widest text-white/75">Family Hub</p>
+            <h1 className="mt-2 font-display text-3xl font-extrabold md:text-4xl">{t("dashboard.title")}</h1>
+            <p className="mt-3 max-w-xl text-sm text-white/85">
               {statusText}
             </p>
           </div>
           <Link href="/settings">
-            <Button variant="secondary" className="border-white/20 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20">
+            <Button variant="secondary" className="border-white/30 bg-white/15 text-white backdrop-blur-sm hover:bg-white/25">
               {t("nav.settings")}
             </Button>
           </Link>
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2.5">
-          <span className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
+        <div className="relative mt-5 flex flex-wrap gap-2.5">
+          <span className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-bold ring-1 ring-inset ring-white/20 backdrop-blur-sm">
             👨‍👩‍👧 孩子档案 {children.length}/3
           </span>
-          <span className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
+          <span className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-bold ring-1 ring-inset ring-white/20 backdrop-blur-sm">
             {children.filter((c) => c.assessmentDone).length} 人已完成测评
           </span>
         </div>
@@ -75,15 +77,15 @@ export default async function DashboardPage() {
 
       <section className="mt-10">
         <div className="mb-6">
-          <h2 className="text-2xl font-black text-slate-900">我的宝贝</h2>
+          <h2 className="font-display text-2xl font-extrabold text-slate-900">我的宝贝</h2>
           <p className="mt-1 text-sm text-slate-500">每个孩子都有专属可爱头像，点击开始学习吧</p>
         </div>
 
         {children.length === 0 ? (
           <div className="grid gap-5 lg:grid-cols-2">
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 p-8 text-center backdrop-blur-sm">
-              <p className="text-5xl">👋</p>
-              <h3 className="mt-4 text-xl font-bold text-slate-900">欢迎来到家长中心</h3>
+            <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-white bg-white/85 p-8 text-center shadow-[0_18px_40px_-22px_rgb(135_92_255/0.4)] ring-1 ring-grape-100 backdrop-blur-sm">
+              <p className="text-5xl"><span className="candy-wiggle inline-block">👋</span></p>
+              <h3 className="mt-4 font-display text-xl font-extrabold text-slate-900">欢迎来到家长中心</h3>
               <p className="mt-2 text-sm text-slate-500">先添加一个孩子档案，系统会自动分配可爱头像</p>
             </div>
             <AddChildPanel disabled={false} />

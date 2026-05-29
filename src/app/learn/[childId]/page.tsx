@@ -72,24 +72,24 @@ export default async function LearnPage({ params }: { params: Promise<{ childId:
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
         aria-hidden
       >
-        <div className="absolute -top-20 right-0 h-64 w-72 rounded-full bg-amber-100/40 blur-3xl" />
-        <div className="absolute left-0 top-32 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
+        <div className="candy-float absolute -top-20 right-0 h-64 w-72 rounded-full bg-sun-200/40 blur-3xl" />
+        <div className="candy-float-slow absolute left-0 top-32 h-56 w-56 rounded-full bg-grape-200/40 blur-3xl" />
       </div>
 
-      <Link href="/dashboard" className="inline-flex text-sm font-medium text-indigo-600 transition hover:text-indigo-800">
+      <Link href="/dashboard" className="inline-flex text-sm font-bold text-grape-600 transition hover:text-grape-800">
         ← 返回家长中心
       </Link>
       <div className="mt-5">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">{child.name}，选择今日冒险！</h1>
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-slate-900">{child.name}，选择今日冒险！</h1>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+          <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-600 ring-1 ring-inset ring-slate-200">
             {child.age} 岁
           </span>
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700">
+          <span className="rounded-full bg-grape-100 px-3 py-1 text-sm font-bold text-grape-700 ring-1 ring-inset ring-grape-200">
             {sessionLabel}
           </span>
         </div>
-        <p className="mt-3 text-sm text-emerald-600">练习进度已保存到云端，下次登录可继续</p>
+        <p className="mt-3 text-sm font-medium text-mint-600">练习进度已保存到云端，下次登录可继续</p>
       </div>
 
       {continueTarget ? (

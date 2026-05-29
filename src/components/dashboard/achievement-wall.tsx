@@ -61,9 +61,9 @@ function AchievementMedal({
   return (
     <div
       className={cn(
-        "group flex flex-col items-center rounded-[1.5rem] border p-4 text-center transition",
+        "candy-card group flex flex-col items-center rounded-[1.5rem] border-2 p-4 text-center",
         unlocked
-          ? "border-amber-100 bg-gradient-to-b from-white to-amber-50/80 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+          ? "border-sun-200 bg-gradient-to-b from-white to-sun-50 shadow-sm"
           : "border-dashed border-slate-200 bg-slate-50/80",
       )}
       title={hint}
@@ -110,7 +110,7 @@ export function AchievementWall({ achievements }: { achievements: UnlockedAchiev
     <div>
       <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">成就墙</h2>
+          <h2 className="font-display text-lg font-extrabold text-slate-900">成就墙</h2>
           <p className="mt-1 text-sm text-slate-500">
             已点亮 {unlockedCount} / {items.length} 枚奖章
           </p>

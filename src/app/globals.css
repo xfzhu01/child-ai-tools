@@ -1,5 +1,88 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────
+   Candy Arcade design tokens (Tailwind v4 @theme)
+   These generate utilities like bg-grape-500, text-bubble-600,
+   font-display, shadow-candy, etc.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  /* Rounded, kid-friendly display font (loaded via next/font in layout.tsx).
+     Chinese falls back to the rounded system stack. */
+  --font-display: var(--font-fredoka), "PingFang SC", "Microsoft YaHei", ui-rounded, sans-serif;
+
+  /* Grape — brand primary */
+  --color-grape-50: #f4f1ff;
+  --color-grape-100: #eae8ff;
+  --color-grape-200: #dccdff;
+  --color-grape-300: #c2a8ff;
+  --color-grape-400: #a47cff;
+  --color-grape-500: #875cff;
+  --color-grape-600: #7440f5;
+  --color-grape-700: #6230d6;
+  --color-grape-800: #4f29ab;
+  --color-grape-900: #412688;
+
+  /* Sun — warm yellow CTA */
+  --color-sun-50: #fff9e6;
+  --color-sun-100: #fff0bf;
+  --color-sun-200: #ffe28a;
+  --color-sun-300: #ffd45c;
+  --color-sun-400: #ffc53d;
+  --color-sun-500: #fbb01e;
+  --color-sun-600: #e08c00;
+  --color-sun-700: #b86d00;
+
+  /* Bubble — bubblegum pink */
+  --color-bubble-50: #fff0f7;
+  --color-bubble-100: #ffdded;
+  --color-bubble-200: #ffbcdb;
+  --color-bubble-300: #ff93c4;
+  --color-bubble-400: #ff6fb5;
+  --color-bubble-500: #fb479e;
+  --color-bubble-600: #e01f80;
+  --color-bubble-700: #b3155f;
+
+  /* Mint — fresh green */
+  --color-mint-50: #e9fdf5;
+  --color-mint-100: #c7f9e7;
+  --color-mint-200: #93f0d2;
+  --color-mint-300: #54e3b8;
+  --color-mint-400: #27d3a2;
+  --color-mint-500: #11b88a;
+  --color-mint-600: #0a936f;
+  --color-mint-700: #08745a;
+
+  /* Aqua — bright blue */
+  --color-aqua-50: #e8f8ff;
+  --color-aqua-100: #ccefff;
+  --color-aqua-200: #99dcff;
+  --color-aqua-300: #5fc6fb;
+  --color-aqua-400: #3dbdf8;
+  --color-aqua-500: #189fe0;
+  --color-aqua-600: #0c7db8;
+  --color-aqua-700: #0a6394;
+
+  /* Coral — warm orange */
+  --color-coral-50: #fff1ec;
+  --color-coral-100: #ffded2;
+  --color-coral-200: #ffbda6;
+  --color-coral-300: #ff9670;
+  --color-coral-400: #ff7a59;
+  --color-coral-500: #f55a33;
+  --color-coral-600: #d63f1c;
+  --color-coral-700: #ad3217;
+
+  /* Cream — warm page backgrounds */
+  --color-cream-50: #fffdf8;
+  --color-cream-100: #fdf7ec;
+  --color-cream-200: #faeed6;
+
+  /* Soft, colored candy shadows → shadow-candy / shadow-pop / shadow-glow */
+  --shadow-candy: 0 14px 34px -12px rgb(135 92 255 / 0.45);
+  --shadow-pop: 0 10px 0 -2px rgb(0 0 0 / 0.06), 0 18px 38px -16px rgb(135 92 255 / 0.4);
+  --shadow-glow: 0 0 0 4px rgb(255 255 255 / 0.7), 0 12px 30px -10px rgb(251 71 158 / 0.45);
+}
+
 body {
   font-family: ui-rounded, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
@@ -898,5 +981,130 @@ body {
   .key-rain-target--caught,
   .key-rain-sky {
     animation: none;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Candy Arcade shared UI motion & decoration
+   ────────────────────────────────────────────────────────────── */
+
+/* Chunky button press / squash */
+.candy-press {
+  transition:
+    transform 0.12s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+.candy-press:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+}
+.candy-press:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+}
+
+/* Card hover lift with a touch of playfulness */
+.candy-card {
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.candy-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Floating candy orbs in backgrounds */
+@keyframes candy-float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-14px) translateX(6px);
+  }
+}
+.candy-float {
+  animation: candy-float 7s ease-in-out infinite;
+}
+.candy-float-slow {
+  animation: candy-float 11s ease-in-out infinite;
+}
+
+/* Bouncy entrance for hero / headline elements */
+@keyframes candy-pop-in {
+  0% {
+    transform: scale(0.8) translateY(10px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.04) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+.candy-pop-in {
+  animation: candy-pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gentle wiggle for emoji / sticker accents */
+@keyframes candy-wiggle {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+.candy-wiggle {
+  display: inline-block;
+  animation: candy-wiggle 2.6s ease-in-out infinite;
+}
+
+/* Animated rainbow text for hero highlights */
+@keyframes candy-text-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.candy-text-rainbow {
+  background-image: linear-gradient(
+    90deg,
+    #875cff,
+    #fb479e,
+    #ffc53d,
+    #27d3a2,
+    #3dbdf8,
+    #875cff
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: candy-text-shimmer 4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candy-press,
+  .candy-card,
+  .candy-float,
+  .candy-float-slow,
+  .candy-pop-in,
+  .candy-wiggle,
+  .candy-text-rainbow {
+    animation: none;
+    transition: none;
+  }
+  .candy-press:hover:not(:disabled),
+  .candy-press:active:not(:disabled),
+  .candy-card:hover {
+    transform: none;
   }
 }

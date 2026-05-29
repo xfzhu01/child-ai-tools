@@ -70,9 +70,9 @@ export function ReportTrendChart({ data }: { data: ReportChartPoint[] }) {
             yAxisId="accuracy"
             type="monotone"
             dataKey="accuracy"
-            stroke="#4f46e5"
-            strokeWidth={2.5}
-            dot={{ r: 3, strokeWidth: 2, fill: "#eef2ff" }}
+            stroke="#875cff"
+            strokeWidth={3}
+            dot={{ r: 3, strokeWidth: 2, fill: "#f4f1ff" }}
             activeDot={{ r: 5 }}
             name="accuracy"
           />
@@ -80,9 +80,9 @@ export function ReportTrendChart({ data }: { data: ReportChartPoint[] }) {
             yAxisId="wpm"
             type="monotone"
             dataKey="wpm"
-            stroke="#ea580c"
-            strokeWidth={2.5}
-            dot={{ r: 3, strokeWidth: 2, fill: "#fff7ed" }}
+            stroke="#fb479e"
+            strokeWidth={3}
+            dot={{ r: 3, strokeWidth: 2, fill: "#fff0f7" }}
             activeDot={{ r: 5 }}
             name="wpm"
           />
@@ -152,10 +152,10 @@ function MetricCard({
   footnote?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
-      {hint ? <p className="mt-1 text-sm font-medium text-indigo-700">{hint}</p> : null}
+    <div className="rounded-2xl border-2 border-white bg-white p-4 shadow-[0_12px_28px_-20px_rgb(135_92_255/0.4)] ring-1 ring-grape-100">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-2 font-display text-2xl font-extrabold text-slate-900">{value}</p>
+      {hint ? <p className="mt-1 text-sm font-bold text-grape-700">{hint}</p> : null}
       {footnote ? <p className="mt-2 text-xs leading-relaxed text-slate-500">{footnote}</p> : null}
     </div>
   );
@@ -244,7 +244,7 @@ export function WeakKeysTable({
           {rows.map((row) => (
             <tr key={row.key} className="border-b border-slate-100 last:border-0">
               <td className="py-3 pr-4 font-bold uppercase text-slate-800">{row.key}</td>
-              <td className="py-3 pr-4 text-rose-700">{Math.round(row.errorRate * 100)}%</td>
+              <td className="py-3 pr-4 font-semibold text-coral-600">{Math.round(row.errorRate * 100)}%</td>
               <td className="py-3 pr-4 text-slate-700">{Math.round(row.avgLatencyMs)} ms</td>
               <td className="py-3 text-slate-600">{row.count}</td>
             </tr>
@@ -263,17 +263,17 @@ export function ModeProgressPanel({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {rows.map((row) => (
-        <div key={row.title} className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+        <div key={row.title} className="rounded-2xl border-2 border-white bg-grape-50/60 p-4 ring-1 ring-grape-100">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-semibold text-slate-800">{row.title}</p>
-            <span className="text-xs font-semibold text-indigo-700">
+            <p className="font-bold text-slate-800">{row.title}</p>
+            <span className="text-xs font-bold text-grape-700">
               {row.complete ? "已完成" : `${row.percent}%`}
             </span>
           </div>
           <p className="mt-1 text-sm text-slate-600">{row.summary}</p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-grape-400 to-bubble-400 transition-all"
               style={{ width: `${row.percent}%` }}
             />
           </div>

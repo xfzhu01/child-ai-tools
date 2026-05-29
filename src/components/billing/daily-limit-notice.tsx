@@ -10,14 +10,14 @@ type DailyLimitNoticeProps = {
 export function DailyLimitNotice({ childId, compact }: DailyLimitNoticeProps) {
   return (
     <div
-      className={`rounded-2xl border border-amber-200 bg-amber-50 text-amber-950 ${
+      className={`rounded-3xl border-2 border-sun-200 bg-sun-50 text-sun-900 shadow-[0_14px_34px_-22px_rgb(251_176_30/0.6)] ${
         compact ? "p-4" : "p-6"
       }`}
     >
-      <p className={`font-bold ${compact ? "text-sm" : "text-base"}`}>今日免费练习次数已用完</p>
-      <p className={`mt-2 text-amber-900/80 ${compact ? "text-xs leading-relaxed" : "text-sm leading-relaxed"}`}>
+      <p className={`font-display font-extrabold ${compact ? "text-sm" : "text-base"}`}>⏰ 今日免费练习次数已用完</p>
+      <p className={`mt-2 text-sun-700/90 ${compact ? "text-xs leading-relaxed" : "text-sm leading-relaxed"}`}>
         请明天再来继续练习，或升级{" "}
-        <span className="font-semibold">{PLANS.basic.name}</span>（{PLANS.basic.price}
+        <span className="font-bold">{PLANS.basic.name}</span>（{PLANS.basic.price}
         {PLANS.basic.priceNote}）解锁全部官方关卡无限练习。
       </p>
       <div className={`flex flex-wrap gap-2 ${compact ? "mt-3" : "mt-4"}`}>
@@ -32,7 +32,7 @@ export function DailyLimitNotice({ childId, compact }: DailyLimitNoticeProps) {
           </Button>
         </Link>
         {childId ? (
-          <Link href={`/learn/${childId}`} className="self-center text-sm text-amber-800 underline-offset-2 hover:underline">
+          <Link href={`/learn/${childId}`} className="self-center text-sm font-bold text-grape-600 underline-offset-2 hover:underline">
             返回模式选择
           </Link>
         ) : null}

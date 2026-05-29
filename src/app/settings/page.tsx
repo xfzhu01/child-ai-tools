@@ -29,41 +29,41 @@ export default async function SettingsPage() {
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
         aria-hidden
       >
-        <div className="absolute -top-24 right-0 h-64 w-80 rounded-full bg-violet-100/40 blur-3xl" />
+        <div className="candy-float absolute -top-24 right-0 h-64 w-80 rounded-full bg-grape-200/40 blur-3xl" />
       </div>
 
-      <h1 className="text-3xl font-black text-slate-900">账号设置</h1>
+      <h1 className="font-display text-3xl font-extrabold text-slate-900">账号设置</h1>
       <p className="mt-2 text-sm text-slate-500">管理您的账号信息和订阅</p>
 
       <Card className="mt-8">
-        <h2 className="text-base font-bold text-slate-900">账号信息</h2>
+        <h2 className="font-display text-base font-extrabold text-slate-900">账号信息</h2>
         <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5">
+          <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-2.5">
             <span className="text-sm text-slate-500">邮箱</span>
-            <span className="text-sm font-medium text-slate-900">{user?.email}</span>
+            <span className="text-sm font-bold text-slate-900">{user?.email}</span>
           </div>
-          <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5">
+          <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-2.5">
             <span className="text-sm text-slate-500">昵称</span>
-            <span className="text-sm font-medium text-slate-900">{user?.name}</span>
+            <span className="text-sm font-bold text-slate-900">{user?.name}</span>
           </div>
-          <div className="flex items-center justify-between rounded-xl bg-indigo-50 px-4 py-2.5">
-            <span className="text-sm text-indigo-600">订阅状态</span>
-            <span className="text-sm font-semibold text-indigo-700">{statusDetail}</span>
+          <div className="flex items-center justify-between rounded-2xl bg-grape-50 px-4 py-2.5 ring-1 ring-inset ring-grape-100">
+            <span className="text-sm text-grape-600">订阅状态</span>
+            <span className="text-sm font-bold text-grape-700">{statusDetail}</span>
           </div>
         </div>
         <Link
           href="/pricing"
-          className="mt-4 inline-flex text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+          className="mt-4 inline-flex text-sm font-bold text-grape-600 transition hover:text-grape-700"
         >
           查看定价方案 →
         </Link>
       </Card>
 
       <Card className="mt-5">
-        <h2 className="text-base font-bold text-slate-900">开通付费版</h2>
+        <h2 className="font-display text-base font-extrabold text-slate-900">开通付费版</h2>
         <p className="mt-2 text-sm text-slate-500">
           如有邀请码可直接兑换激活。也可发邮件至{" "}
-          <a href="mailto:397543632@qq.com" className="font-medium text-indigo-600 hover:text-indigo-700">
+          <a href="mailto:397543632@qq.com" className="font-bold text-grape-600 hover:text-grape-700">
             397543632@qq.com
           </a>
           {" "}注明注册邮箱和想开通的版本（官方关卡版 ¥19.9/年 或 AI 智能版 ¥49.9/年），24 小时内为您开通。
@@ -72,7 +72,7 @@ export default async function SettingsPage() {
       </Card>
 
       <Card className="mt-5">
-        <h2 className="text-base font-bold text-slate-900">语言</h2>
+        <h2 className="font-display text-base font-extrabold text-slate-900">语言</h2>
         <p className="mt-3 text-sm text-slate-600">当前：简体中文（英文预留）</p>
       </Card>
     </div>

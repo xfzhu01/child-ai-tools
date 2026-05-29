@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
+import { Fredoka } from "next/font/google";
 import { auth } from "@/lib/auth";
 import { getTryPath } from "@/lib/auth/try-path";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Providers } from "@/components/providers";
 import "./globals.css";
+
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-fredoka",
+  display: "swap",
+});
 
 export const dynamic = "force-dynamic";
 
@@ -32,8 +40,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const tryHref = await getTryPath(session?.user?.id);
 
   return (
-    <html lang="zh-CN">
-        <body className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50/30 text-slate-900 antialiased">
+    <html lang="zh-CN" className={fredoka.variable}>
+        <body className="min-h-screen bg-gradient-to-b from-cream-100 via-grape-50 to-bubble-50/50 text-slate-900 antialiased">
         <Providers session={session}>
           <div className="flex min-h-screen flex-col">
             <SiteHeader session={session} tryHref={tryHref} />

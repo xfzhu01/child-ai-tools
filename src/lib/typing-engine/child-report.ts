@@ -225,9 +225,9 @@ export function trendLabel(trend: TrendDirection) {
 }
 
 export function trendTone(trend: TrendDirection) {
-  if (trend === "up") return "text-emerald-700 bg-emerald-50";
-  if (trend === "down") return "text-amber-700 bg-amber-50";
-  if (trend === "stable") return "text-sky-700 bg-sky-50";
+  if (trend === "up") return "text-mint-700 bg-mint-100 ring-1 ring-inset ring-mint-200";
+  if (trend === "down") return "text-coral-700 bg-coral-100 ring-1 ring-inset ring-coral-200";
+  if (trend === "stable") return "text-aqua-700 bg-aqua-100 ring-1 ring-inset ring-aqua-200";
   return "text-slate-600 bg-slate-100";
 }
 

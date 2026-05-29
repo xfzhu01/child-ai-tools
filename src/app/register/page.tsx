@@ -76,38 +76,40 @@ export default function RegisterPage() {
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
         aria-hidden
       >
-        <div className="absolute -top-24 left-1/2 h-80 w-96 -translate-x-1/2 rounded-full bg-violet-100/60 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 h-80 w-96 -translate-x-1/2 rounded-full bg-grape-200/50 blur-3xl" />
+        <div className="candy-float absolute left-0 top-40 h-40 w-40 rounded-full bg-mint-200/40 blur-3xl" />
       </div>
 
       <div className="w-full">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black text-slate-900">创建家长账号</h1>
+          <div className="mb-3 text-4xl"><span className="candy-wiggle inline-block">🚀</span></div>
+          <h1 className="font-display text-3xl font-extrabold text-slate-900">创建家长账号</h1>
           <p className="mt-2 text-sm text-slate-500">注册后为孩子建档，保存学习进度</p>
         </div>
 
-        <Card className="border-slate-200/60 bg-white/90 p-8">
+        <Card className="p-8">
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">昵称</label>
+              <label className="mb-1.5 block text-sm font-bold text-slate-700">昵称</label>
               <Input placeholder="您的昵称" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">邮箱</label>
+              <label className="mb-1.5 block text-sm font-bold text-slate-700">邮箱</label>
               <Input type="email" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">密码</label>
+              <label className="mb-1.5 block text-sm font-bold text-slate-700">密码</label>
               <Input type="password" placeholder="至少 8 位" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={8} />
             </div>
-            <label className="flex items-start gap-2.5 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
-              <input type="checkbox" checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} className="mt-0.5 rounded" required />
+            <label className="flex items-start gap-2.5 rounded-2xl bg-grape-50 p-3 text-sm text-slate-600 ring-1 ring-inset ring-grape-100">
+              <input type="checkbox" checked={form.consent} onChange={(e) => setForm({ ...form, consent: e.target.checked })} className="mt-0.5 rounded accent-grape-600" required />
               <span>
                 我确认是为 13 岁以下儿童创建学习档案的监护人，并已阅读
-                <Link href="/legal/privacy" className="font-medium text-indigo-600 hover:text-indigo-700"> 隐私政策</Link>。
+                <Link href="/legal/privacy" className="font-bold text-grape-600 hover:text-grape-700"> 隐私政策</Link>。
               </span>
             </label>
             {error && (
-              <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">{error}</p>
+              <p className="rounded-xl bg-coral-50 px-3 py-2 text-sm font-medium text-coral-600">{error}</p>
             )}
             <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? "注册中..." : "注册并开始"}
@@ -117,7 +119,7 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           已有账号？
-          <Link href="/login" className="ml-1 font-semibold text-indigo-600 hover:text-indigo-700">
+          <Link href="/login" className="ml-1 font-bold text-grape-600 hover:text-grape-700">
             登录
           </Link>
         </p>

@@ -34,15 +34,15 @@ export function AddChildPanel({ disabled, compact }: { disabled?: boolean; compa
   return (
     <article
       className={cn(
-        "flex h-full flex-col rounded-3xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-5",
+        "flex h-full flex-col rounded-3xl border-2 border-dashed border-grape-200 bg-grape-50/50 p-5",
         disabled && "opacity-70",
       )}
     >
       <div className="flex flex-col items-center text-center">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white text-5xl shadow-inner ring-4 ring-indigo-100">
-          ✨
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white text-5xl shadow-inner ring-4 ring-grape-100">
+          <span className="candy-wiggle inline-block">✨</span>
         </div>
-        <h3 className="mt-4 text-lg font-black text-indigo-900">添加新宝贝</h3>
+        <h3 className="mt-4 font-display text-lg font-extrabold text-grape-900">添加新宝贝</h3>
         <p className="mt-1 text-sm text-slate-500">最多 3 个孩子档案，会自动分配可爱头像</p>
       </div>
 
@@ -56,7 +56,7 @@ export function AddChildPanel({ disabled, compact }: { disabled?: boolean; compa
           className="bg-white"
         />
         <div>
-          <label className="mb-1 block text-left text-xs font-medium text-slate-500">年龄（6–12 岁）</label>
+          <label className="mb-1 block text-left text-xs font-bold text-slate-500">年龄（6–12 岁）</label>
           <Input
             type="number"
             min={6}
@@ -68,7 +68,7 @@ export function AddChildPanel({ disabled, compact }: { disabled?: boolean; compa
             className="bg-white"
           />
         </div>
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && <p className="text-sm font-medium text-coral-600">{error}</p>}
         <Button type="submit" className="mt-auto w-full" disabled={disabled || loading}>
           {disabled ? "已达上限" : loading ? "创建中..." : "添加孩子"}
         </Button>

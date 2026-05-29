@@ -72,14 +72,14 @@ export default async function ModeLevelsPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <Link href={`/learn/${childId}`} className="text-sm text-indigo-600">
+      <Link href={`/learn/${childId}`} className="text-sm font-bold text-grape-600 hover:text-grape-800">
         ← 返回模式选择
       </Link>
-      <h1 className="mt-4 text-3xl font-black">
-        {meta.emoji} {meta.title}
+      <h1 className="mt-4 font-display text-3xl font-extrabold">
+        <span className="candy-wiggle mr-1 inline-block">{meta.emoji}</span> {meta.title}
       </h1>
       <p className="mt-2 text-slate-600">{meta.desc}</p>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm font-medium text-grape-600">
         {child.name} · {sessionLabel}
       </p>
 
@@ -139,11 +139,11 @@ export default async function ModeLevelsPage({
           return (
             <Card
               key={level}
-              className={`p-4 ${unlocked ? "" : "opacity-50"} ${isCurrent ? "border-indigo-300 bg-indigo-50" : ""}`}
+              className={`candy-card p-4 ${unlocked ? "" : "opacity-50"} ${isCurrent ? "border-grape-300 ring-2 ring-grape-200" : ""}`}
             >
-              <p className="text-xs font-medium text-slate-500">关卡 {level}</p>
+              <p className="text-xs font-bold text-grape-500">关卡 {level}</p>
               <p className="mt-1 text-sm font-bold leading-snug">{getLevelTitle(mode, level)}</p>
-              <p className="mt-2 text-sm text-amber-600">{stars > 0 ? "⭐".repeat(stars) : "未挑战"}</p>
+              <p className="mt-2 text-sm text-sun-600">{stars > 0 ? "⭐".repeat(stars) : "未挑战"}</p>
               {unlocked && canStart ? (
                 <Link href={`/learn/${childId}/play?mode=${mode}&level=${level}`} className="mt-3 block">
                   <Button variant="child" className="w-full text-sm">
@@ -151,7 +151,7 @@ export default async function ModeLevelsPage({
                   </Button>
                 </Link>
               ) : unlocked && !canStart ? (
-                <p className="mt-3 text-center text-xs text-amber-700">今日次数已用完</p>
+                <p className="mt-3 text-center text-xs text-coral-600">今日次数已用完</p>
               ) : (
                 <p className="mt-3 text-center text-xs text-slate-400">未解锁</p>
               )}

@@ -4,7 +4,7 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-16">
       <div className="mb-10">
-        <h1 className="text-3xl font-black text-slate-900">隐私政策</h1>
+        <h1 className="font-display text-3xl font-extrabold text-slate-900">隐私政策</h1>
         <p className="mt-2 text-sm text-slate-500">最后更新：2024 年</p>
       </div>
       <Card className="space-y-4 leading-7 text-slate-700">

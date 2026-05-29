@@ -26,10 +26,10 @@ function NavItem({
       href={href}
       onClick={onClick}
       className={cn(
-        "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "rounded-full px-3.5 py-2 text-sm font-bold transition-colors",
         active
-          ? "bg-indigo-50 text-indigo-700"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+          ? "bg-grape-100 text-grape-700 ring-1 ring-inset ring-grape-200"
+          : "text-slate-600 hover:bg-grape-50 hover:text-grape-700",
       )}
     >
       {children}
@@ -59,7 +59,7 @@ export function SiteHeaderClient({
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b-2 border-white/70 bg-cream-50/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3">
         <Link
           href={logoHref}
@@ -100,7 +100,7 @@ export function SiteHeaderClient({
               </form>
             </>
           ) : (
-            <div className="ml-2 flex items-center gap-2 border-l border-slate-200 pl-3">
+            <div className="ml-2 flex items-center gap-2 border-l-2 border-grape-100 pl-3">
               <Link href="/login">
                 <Button variant="ghost">{t("nav.login")}</Button>
               </Link>
@@ -113,7 +113,7 @@ export function SiteHeaderClient({
 
         <button
           type="button"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 md:hidden"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border-2 border-grape-100 bg-white text-grape-700 md:hidden"
           aria-expanded={open}
           aria-label="打开菜单"
           onClick={() => setOpen((v) => !v)}
@@ -130,7 +130,7 @@ export function SiteHeaderClient({
       </div>
 
       {open ? (
-        <div className="border-t border-slate-100 bg-white px-4 py-3 md:hidden">
+        <div className="border-t-2 border-grape-100 bg-cream-50 px-4 py-3 md:hidden">
           <nav className="flex flex-col gap-1">
             {publicLinks.map((link) => (
               <NavItem
@@ -159,7 +159,7 @@ export function SiteHeaderClient({
                 </form>
               </>
             ) : (
-              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+              <div className="mt-2 grid grid-cols-2 gap-2 border-t-2 border-grape-100 pt-3">
                 <Link href="/login" onClick={close}>
                   <Button variant="secondary" className="w-full">
                     {t("nav.login")}
